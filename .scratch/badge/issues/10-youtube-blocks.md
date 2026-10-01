@@ -42,3 +42,5 @@ Ruled out: rotating IPs/proxies to dodge the check (evades YouTube's abuse detec
 **2026-10-01, VPN test, mode 2:** cookies + `SAPISIDHASH` with the ANDROID client → **HTTP 400 Bad Request** for every video. YouTube rejects web auth on the ANDROID client. Mode 2 removed. Modes 0 and 1 still to test.
 
 **2026-10-01, VPN test, mode 0:** 5/5 captions (0.6–0.7 s) and 5 Great verdicts (total 1.0–1.2 s), so the VPN IP is **not** blocked and can't show whether cookies avoid a block. Windowing change confirmed (`aKOQtGLT-Yk`, 409 s: 3 windows, was 4). `U7_C8llyoGE` wasn't in the top 5 this time, so the one-window Great is still unconfirmed. The real mode 1 test needs a blocked network (hotspot or home Wi-Fi while blocked).
+
+**2026-10-01, VPN test, mode 1:** same search, 5/5 captions (0.31–0.37 s) and 5 Great (total 0.66–0.87 s). Sending cookies with the ANDROID client works and breaks nothing. Still to show: whether it avoids a block (test on the blocked hotspot/home Wi-Fi, mode 1 then mode 0).
