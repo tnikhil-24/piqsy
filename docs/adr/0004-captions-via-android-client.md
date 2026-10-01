@@ -20,6 +20,10 @@ It was the only route that worked, and it held up in the browser: 30/30 videos h
 - Bulk fetching from one IP triggers Google's timedtext block (HTTP 429), which also breaks the user's own YouTube captions while it lasts. Never prefetch beyond the top 5, and keep caching.
 - Long auto-caption videos are slow as json3 (31 h → 31 s). Slice 05 must switch to a line-level format or otherwise bound the fetch time.
 
+## Update 2026-10-01 (afternoon)
+
+The "revisit" trigger fired the same day: after about 60 videos on the hotspot, the **player** request itself returned `LOGIN_REQUIRED: Sign in to confirm you're not a bot` for every video. Cookie-less requests look like a scraper; the first fix to try is sending the user's own YouTube session. See `.scratch/badge/issues/10-youtube-blocks.md` and `docs/captions-spike.md` ("What breaks" 6).
+
 ## Revisit when
 
 Captions start failing (`fetch failed` in the run log), or before anyone else installs the extension: many users on one unofficial client draw attention.

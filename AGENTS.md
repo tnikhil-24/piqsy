@@ -24,7 +24,7 @@ Single-context: one root `CONTEXT.md` plus `docs/adr/`. See `docs/agents/domain.
 ## Code and status
 
 - `extension/`: Manifest V3, plain JS, no build step. `content.js` (search page adapter, chips, per-video evaluation), `captions.js` (caption fetcher + per-tab cache), `windows.js` (windowing), `verdict.js` (verdict engine), `background.js` (service worker: the only Jev caller and run-log writer), `jev.js` (Jev client), `runlog.js` (persistent run log), `options.html`/`options.js` (Jev key, log export), `chip.css`.
-- Slices 01–04 done; next is 05 (long videos). Status is the `Status:` line in each `.scratch/badge/issues/*.md`; a done slice is `Status: done`.
+- Slices 01–04 done. Next: 10 (survive YouTube blocks), proposed before 05 (long videos); awaiting the owner's OK. Status is the `Status:` line in each `.scratch/badge/issues/*.md`; a done slice is `Status: done`.
 
 ## Running and testing
 
@@ -40,3 +40,8 @@ Single-context: one root `CONTEXT.md` plus `docs/adr/`. See `docs/agents/domain.
 ## Don't bulk-fetch from YouTube
 
 Downloading many caption files from the owner's machine (scripts, probes) gets the IP blocked by Google (timedtext HTTP 429, "automated queries"), which also breaks Piqsy and the owner's own YouTube captions for a while. On 2026-10-01 about 30 large caption downloads in 5 minutes did it. Probe at most a few small videos, and never loop over long courses. If blocked, the owner can switch networks (e.g. phone hotspot).
+
+The same day the hotspot was blocked too, at normal-use volume (about 60 videos in a few hours; see `docs/assessment.md` risk 1 and issue 10). So in manual tests:
+- Ask for as few searches as the check needs, with short videos.
+- Reloading the extension or the tab empties the caption cache, so the next search fetches everything again. Don't ask for reloads that aren't needed.
+- Run-log timestamps (`ts`) are UTC.
