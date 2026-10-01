@@ -83,6 +83,7 @@ One outlier: `DqcZLulVJ0M` (18 min, 406 lines) took **11.2 s** once on a repeat 
 ### Observations
 
 0. **Long auto-caption videos are far too slow as json3 (the main problem).** Auto (ASR) json3 has word-level timing, so the file size grows with every word: 12 h → 10 s, 16 h → 22 s, 31 h → 31 s on the hotspot. Manual tracks of similar length are small and fast (6.2 h in 0.9 s). Against the p95 < 8 s target, any auto-captioned course over about 8 h misses badly. Fix belongs in slice 05 (long videos): fetch a line-level format (`srv1` was 1.9 MB vs 17.6 MB json3 for 22 h; its one 11.5 s timing came right before the IP block and needs re-measuring), and/or let the chip render late as the PRD allows.
+   *Slice 05 owner check (2026-10-01, Chrome, json3 `textMs`):* 4.0 h auto (6,018 lines) 0.8 s · 5.4 h auto (8,721) 2.8 s · 12.5 h auto (18,248) 5.3 s; player request ~0.3 s each. Better than the hotspot numbers above, but still growing with length. Follow-up: issue 11.
 1. **Long videos are close to the latency budget before Jev even runs.** Time grows with caption size: a 4 h course took 4.3–4.6 s on the hotspot, against 0.6 s for the same 3.8 h video from home in Node. The batch time is set by the slowest of the 5, so the p50 < 4 s target is at risk on course-heavy searches over slow links. Options: `srv3` (about a third of json3's size), or start scoring each video as soon as its own captions arrive, as the PRD's evaluator already does.
 2. **Creator-written "English" tracks on Hindi videos are translations.** `UrsmFxEIp5k` and `gfDE2a7MKjA` are spoken in Hindi; their manual English tracks are uploaded translations, which the PRD allows (only YouTube's auto-translation is rejected). `gfDE2a7MKjA` has only 1,251 lines for 11.9 h (one line per ~34 s), so the track is sparse or partial. Windowing must cope with long caption gaps, and a sparse track may deserve `Unsure`.
 3. **Each search logged a second, fully cached batch right after the first.** YouTube re-renders the results, Piqsy drops the chips and re-adds them, and the cache answers instantly. That's harmless here, but slice 04 must cache results per (query, video) too, or it will call Jev twice per search.
@@ -95,7 +96,7 @@ Why: captions are reachable from the search page without opening the video, logg
 
 | Risk | Where it's handled |
 |---|---|
-| Long auto-caption videos too slow as json3 | slice 05: line-level caption format, bounded fetch time |
+| Long auto-caption videos too slow as json3 | issue 11 (moved from slice 05): measure `srv1`, decide format and saving of long captions |
 | Timedtext IP block after bulk fetching | never fetch beyond the top 5; keep the cache; the run log (slice 03) records failures so a block shows up |
 | ANDROID client retired / PO tokens added | ADR 0004: bump the version, then IOS, then `get_transcript` |
 | Duplicate evaluations from YouTube re-rendering results | slice 04: cache results per (query, video) |

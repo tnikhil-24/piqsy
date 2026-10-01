@@ -1,6 +1,6 @@
 # 0001 — Evaluate with Jev window scoring, not an LLM
 
-Date: 2026-10-01 · Status: accepted
+Date: 2026-10-01 · Status: accepted · Amended by ADR 0005 (broad queries use a different window question and verdict rule)
 
 ## Context
 
