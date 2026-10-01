@@ -48,3 +48,10 @@ Ruled out: rotating IPs/proxies to dodge the check (evades YouTube's abuse detec
 **2026-10-01, owner's normal network (no VPN), mode 0:** 5/5 captions, so the earlier block there has **lifted** (it lasted at least 4 min and less than a few hours; exact lift time unknown). So no blocked network was available to test mode 1 against. Option 1 is safe (works, no errors) but **unproven against a block**; test it on the next block before making it the default.
 - `U7_C8llyoGE` (95 s, 1 window) → **Great**: the one-window rule from `35bc3c5` is confirmed in Chrome.
 - Outlier: `KnKXHcsde5A` (188 s) captions took **10.7 s** (others 0.4–0.5 s). Same pattern as `DqcZLulVJ0M` (11.2 s) in the slice 02 run. Possibly soft throttling right after a block lifts; watch for it in the run log (`captionMs`).
+
+**2026-10-01, full run-log review (times UTC):**
+- 18:54 hotspot: bot check, 5/5. 19:18 the owner's normal network: 5/5 OK in both modes.
+- 19:09 VPN, mode 0: 4× `TypeError: Failed to fetch` after ~4.2 s (VPN tunnel failures, not YouTube); the 5th took 23 s for captions and 5 s for Jev (slow tunnel).
+- Mode 1 total: 4 searches (19:11 and 19:15 on VPN, 19:17 and 19:18 on the normal network), 20/20 captions, 0 errors. Mode 1 is safe on both networks.
+- Mode 2: 10/10 rejected (HTTP 400), removed.
+- **Recurring ~10 s outlier:** `KnKXHcsde5A` (188 s video) took 10.4 s (19:11, mode 1, VPN) and 10.7 s (19:18, mode 0, normal) for captions, but 0.35–0.67 s in three other runs. Each slow time was the last of 5 parallel fetches. Same as `tfCz563ebsU` 4.4 s (18:43) and `DqcZLulVJ0M` 11.2 s (slice 02). It isn't tied to one video or cookie mode. **It breaks the p95 < 8 s target.** Next step: log the player and timedtext times separately to see which request stalls.
