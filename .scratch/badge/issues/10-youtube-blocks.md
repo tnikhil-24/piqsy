@@ -38,3 +38,5 @@ Ruled out: rotating IPs/proxies to dodge the check (evades YouTube's abuse detec
 ## Comments
 
 **2026-10-01, option 1 experiment wired in.** `extension/captions.js` reads `localStorage.piqsyCookies` in the YouTube tab: unset/0 = no cookies (default, unchanged), 1 = send the user's cookies (`credentials: 'include'`), 2 = cookies + `Authorization: SAPISIDHASH …` like YouTube's own page (needs logged in). The console line ends `[cookies N]` and the run log gains `cookieMode`. The owner is testing over a VPN. Note: VPN IPs are shared and often already flagged by YouTube, and in modes 1/2 the requests are tied to the owner's Google account, not just the IP.
+
+**2026-10-01, VPN test, mode 2:** cookies + `SAPISIDHASH` with the ANDROID client → **HTTP 400 Bad Request** for every video. YouTube rejects web auth on the ANDROID client. Mode 2 removed. Modes 0 and 1 still to test.

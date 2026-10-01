@@ -25,8 +25,8 @@ function parseJson3(json) {
 
 // Experiment (issue 10, option 1), set in the YouTube tab's console, then reload:
 //   localStorage.piqsyCookies = 1   send the user's YouTube cookies
-//   localStorage.piqsyCookies = 2   cookies + the SAPISIDHASH header YouTube's own page sends
 //   delete localStorage.piqsyCookies   back to no cookies (default)
+// (Mode 2, cookies + the web SAPISIDHASH header, got HTTP 400 with the ANDROID client; removed.)
 function cookieMode() {
   try {
     return Number(localStorage.piqsyCookies) || 0;
@@ -35,27 +35,15 @@ function cookieMode() {
   }
 }
 
-// YouTube's web auth header: SHA-1 of "<ts> <SAPISID> <origin>". Null when logged out.
-async function sapisidHash() {
-  const sapisid = document.cookie.match(/(?:^|; )(?:SAPISID|__Secure-3PAPISID)=([^;]+)/)?.[1];
-  if (!sapisid) return null;
-  const ts = Math.floor(Date.now() / 1000);
-  const digest = await crypto.subtle.digest('SHA-1', new TextEncoder().encode(`${ts} ${sapisid} ${location.origin}`));
-  return `SAPISIDHASH ${ts}_${[...new Uint8Array(digest)].map((b) => b.toString(16).padStart(2, '0')).join('')}`;
-}
-
 async function fetchCaptions(videoId) {
   try {
     const mode = cookieMode();
     // Default 'omit' so logged-in and logged-out behave the same.
     const credentials = mode ? 'include' : 'omit';
-    const headers = { 'Content-Type': 'application/json' };
-    const auth = mode === 2 && (await sapisidHash());
-    if (auth) Object.assign(headers, { Authorization: auth, 'X-Origin': location.origin, 'X-Goog-AuthUser': '0' });
     const playerRes = await fetch('https://www.youtube.com/youtubei/v1/player?prettyPrint=false', {
       method: 'POST',
       credentials,
-      headers,
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ context: { client: PLAYER_CLIENT }, videoId }),
     });
     const player = await playerRes.json();
