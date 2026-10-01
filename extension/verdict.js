@@ -11,7 +11,9 @@ const RANGE_LEAD_SEC = 10; // start ranges early: landing early is fine, late is
 
 function verdictOf(scores) {
   if (!scores.length) return 'unsure';
-  const great = scores.some((s, i) => s >= GREAT_PEAK && (scores[i - 1] >= GREAT_SUPPORT || scores[i + 1] >= GREAT_SUPPORT));
+  // A one-window video (about 3 min or less) has no neighbour, so its own score decides.
+  const supported = (i) => scores.length === 1 || scores[i - 1] >= GREAT_SUPPORT || scores[i + 1] >= GREAT_SUPPORT;
+  const great = scores.some((s, i) => s >= GREAT_PEAK && supported(i));
   if (great) return 'great';
   const peak = Math.max(...scores);
   if (peak >= PARTIAL_PEAK) return 'partial';

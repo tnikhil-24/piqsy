@@ -28,3 +28,5 @@ About 50 hand-labelled cases `(query, video, label, relevant start)` covering sh
 - **Videos shorter than about 2 minutes can never be Great:** Great needs two adjacent windows, so a single-window video caps at Partial (`U7_C8llyoGE`, 95 s, score 0.98; `JNdLRT0BoGo`, 52 s, 0.93). Decide whether that's right.
 - **One strong window → Partial:** `o_2psWN8k_c` for "b+ tree deletion underflow merge" scored [0.05, 0.03, 0.95, 0.19]: a 2-minute section in a 7-minute video.
 - **Sparse manual tracks:** `FsAPt_9Bf3U` has 55 lines for a 30-minute video, so 14 of 16 windows are empty (score 0); it got Partial from its first window alone.
+
+**2026-10-01, owner decision:** video length doesn't matter; a very good 2-minute video deserves Great. A one-window video (under about 3 min) is now Great on its own score (≥ `GREAT_PEAK`), and a leftover piece under 1 minute joins the last window. This changes the PRD's Great rule (adjacent support) for one-window videos only. Watch short videos for false Greats here.

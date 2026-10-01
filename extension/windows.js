@@ -9,15 +9,12 @@ const MAX_WINDOWS = 60;
 function makeWindows(lines, durationSec) {
   const last = lines.at(-1);
   const end = durationSec || (last ? last.start + last.duration : 0);
+  if (!end) return [];
   const size = Math.max(WINDOW_SEC, Math.ceil(end / MAX_WINDOWS));
-  const windows = [];
-  for (let start = 0; start < end; start += size) {
-    windows.push({ start, end: Math.min(start + size, end), text: [] });
-  }
-  for (const line of lines) {
-    const w = windows[Math.min(Math.floor(line.start / size), windows.length - 1)];
-    w?.text.push(line.text);
-  }
+  // A leftover under half a window joins the last one (a 2:10 video is one window).
+  const n = Math.max(1, Math.round(end / size));
+  const windows = Array.from({ length: n }, (_, i) => ({ start: i * size, end: i === n - 1 ? end : (i + 1) * size, text: [] }));
+  for (const line of lines) windows[Math.min(Math.floor(line.start / size), n - 1)].text.push(line.text);
   return windows.map((w) => ({ ...w, text: w.text.join(' ') }));
 }
 

@@ -26,6 +26,10 @@ test('a 24-hour video is capped at MAX_WINDOWS', () => {
   assert.equal(w.at(-1).text, 'z');
 });
 
+test('a short leftover joins the last window, so a 2:10 video is one window', () => {
+  assert.deepEqual(makeWindows([line(0, 'a'), line(125, 'b')], 130), [{ start: 0, end: 130, text: 'a b' }]);
+});
+
 test('missing duration falls back to the last caption line', () => {
   const w = makeWindows([line(0, 'a'), line(200, 'b')], NaN);
   assert.equal(w.at(-1).end, 202);

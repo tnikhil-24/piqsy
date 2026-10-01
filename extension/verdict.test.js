@@ -24,8 +24,9 @@ test('verdict boundaries', () => {
   assert.equal(verdict(), 'unsure');
 });
 
-test('one-window video', () => {
-  assert.equal(verdict(0.9), 'partial');
+test('a short one-window video can be Great on its own score', () => {
+  assert.equal(verdict(0.9), 'great');
+  assert.equal(verdict(0.84), 'partial');
 });
 
 test('ranges: runs >= 0.7, strongest 3 in time order, start 10 s early clamped at 0', () => {
