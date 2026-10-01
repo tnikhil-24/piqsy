@@ -18,6 +18,7 @@ Hovering a verdict chip on the search page shows the caption text of the best-sc
 - [ ] Not covered, no captions and error show a short plain explanation instead.
 - [ ] Hover card doesn't block clicking the result or YouTube's own hover preview controls.
 - [ ] Legible on light and dark themes.
+- [ ] Once issue 12 is in: one line saying which kind was assumed, "Judged as: whole subject" or "Judged as: one topic" (ADR 0005).
 
 ## Blocked by
 

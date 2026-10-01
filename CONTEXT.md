@@ -6,6 +6,9 @@ Use these terms exactly. Avoid the listed synonyms.
 |---|---|---|
 | **Query** | The raw text the user typed into YouTube search. | intent (until intent normalisation exists) |
 | **Learning query** | A query whose purpose is to learn a concept or skill, as judged by the learning-query check. Non-learning queries get no chips. | educational search |
+| **Broad query** | A learning query for a whole subject ("dsa full course", "learn kafka"). Judged by how much of the video is on the subject (ADR 0005). | general query |
+| **Narrow query** | A learning query for one concept ("b+ tree deletion"). Judged by the best windows and ranges. The default when Piqsy can't tell. | specific query |
+| **Format words** | Words in a query that describe the video, not the topic ("full course", "tutorial", "for beginners"). Removed before scoring; a hint toward broad. | |
 | **Result** | One regular video in YouTube's search results. Only the top 5 are evaluated. Shorts, ads, channels, playlists and mixes are not results. | item, card |
 | **Captions** | Timestamped English text of a video (creator-written or auto-generated; never auto-translated). | transcript (fine informally), subtitles |
 | **Window** | A contiguous time slice of captions (2 min by default, longer for long videos) scored by Jev. | chunk, segment |

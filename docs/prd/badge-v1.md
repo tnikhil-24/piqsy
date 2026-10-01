@@ -39,6 +39,8 @@ Verdicts come from the video's real captions, not its title: the captions are sp
 18. As a learner, I want no duplicate chips when YouTube re-renders or I scroll, so that the page stays clean.
 19. As a learner, I want results beyond the top 5, Shorts, ads, channels, playlists and mixes to get no chip, so that Piqsy stays focused and quiet.
 20. As a learner, I want videos from 10 minutes up to 24 hours to be rated, so that long courses — where the pain is worst — are covered.
+20a. As a learner searching a whole subject ("dsa full course"), I want a video judged by whether it is about that subject throughout, not by whether one 2-minute piece explains the whole subject, so that real courses and good overviews aren't marked Partial or Unsure. *(Added 2026-10-01, ADR 0005.)*
+20b. As a learner, I want words like "full course" or "tutorial" in my search not to be treated as the topic, so that a course intro saying "in this full course…" doesn't decide the verdict. *(Added 2026-10-01, ADR 0005.)*
 21. As a learner, I want "relevant throughout" videos (e.g. an interview-questions compilation) recognised as such, so that I'm not given a misleading start time.
 
 ### Non-learning searches
@@ -96,8 +98,9 @@ Verdicts come from the video's real captions, not its title: the captions are sp
    - Unsure: anything else.
    - Ranges: runs of consecutive windows ≥ 0.7; at most 3, in time order, strongest flagged; each start shifted 10 s earlier (landing early is fine, landing late is not).
    - Throughout: relevant windows cover ≥ 40% of the video → no ranges, `throughout = true`.
+   - The rules above are for **narrow** queries. **Broad** queries (ADR 0005): Great when relevant windows cover ≥ 40% of the video (`throughout`, no ranges); Partial when some window ≥ 0.6 but coverage < 40% (up to 3 ranges); Not covered and Unsure as above.
 2. **Windowing** (pure, deep). Input: timestamped caption lines and duration. Output: windows (start, end, text). 2-minute windows, growing so a video produces at most about 60 windows. A second function produces fine 2-minute windows inside a given range, used for a second pass when a long video's verdict is Great or Partial and its best window is longer than 2 minutes.
-3. **Jev client** (deep). `scoreWindows(query, windows) → probabilities[]` (one `noul` request per window, run in parallel with a concurrency limit) and `isLearningQuery(query) → probability`. Hides the request shape (questions keyed by id), retries with exponential backoff on 429/529/5xx honouring `Retry-After`, and error classification (auth vs transient vs overloaded). See `docs/jev.md` for the API contract.
+3. **Jev client** (deep). `scoreWindows(query, windows) → probabilities[]` (one `noul` request per window, run in parallel with a concurrency limit) and a query check `checkQuery(query) → { learning, broad }` (two `noul` questions in one request; ADR 0005). Window questions: narrow `This transcript excerpt explains "<topic>"`, broad `This transcript excerpt teaches part of "<topic>"`, where topic is the query with format words removed (the original query if nothing is left). Hides the request shape (questions keyed by id), retries with exponential backoff on 429/529/5xx honouring `Retry-After`, and error classification (auth vs transient vs overloaded). See `docs/jev.md` for the API contract.
 4. **Caption fetcher.** `videoId → { lines: [{ start, duration, text }], kind: manual | auto } | { reason }`. English captions only (manual or auto-generated); auto-translated tracks are rejected with reason "not English". The fetching mechanism is decided by slice 02 (the caption feasibility check) and documented in `docs/captions-spike.md`.
 5. **Evaluator** (background orchestrator). For one search: runs the learning-query check in parallel with caption fetches for the top 5, then windowing → Jev → verdict engine for each video, emitting per-video results as they complete. Writes the run log. *As built (slice 04): the content script orchestrates per video, because captions must be fetched from the YouTube page (ADR 0004); the background worker only calls Jev and writes the run log.*
 6. **Search page adapter.** Reads the query from the page, finds the first 5 regular video results, injects and updates chips, handles YouTube's in-app navigation and re-renders without duplicates.
@@ -112,6 +115,7 @@ Verdicts come from the video's real captions, not its title: the captions are sp
 - No timestamps on the search page in V1. Ranges are always computed and logged; they are shown only on the watch page.
 - Clicking a result opens the video normally (no `&t=` rewriting).
 - Non-learning queries (learning-query probability below a threshold) get no chips at all; the popup switch overrides.
+- Broad vs narrow (ADR 0005): Jev decides in the same query check; format words ("full course", "tutorial", "for beginners", "explained", "crash course", "in one video") are removed before scoring and passed to the check as a hint. Unsure (probability near the threshold) or failed check → narrow. The hover card says which kind was assumed ("Judged as: whole subject" / "Judged as: one topic").
 - "Great" labelling definition (for the benchmark): watching from where the relevant section starts would teach the searcher what they searched for, at about their level. "Partial": covers it, but you'd need another source.
 - Latency target: verdicts for the top 5 at p50 < 4 s, p95 < 8 s. Late verdicts still render but count as misses in the log.
 
@@ -140,7 +144,7 @@ If slice 02 shows captions cannot be fetched reliably from the search page, stop
 - Piqsy logo/brand mark in the chip.
 - Free-text user context ("about me") — decided after the benchmark.
 - Beginner/Intermediate/Advanced selector.
-- Intent normalisation, verdict caching, LLM fallback, summaries, "what it misses", freshness, format detection.
+- Intent normalisation beyond broad vs narrow (ADR 0005), verdict caching, LLM fallback, summaries, "what it misses", freshness, format detection.
 - Google search, other platforms, Firefox, mobile, non-English captions and auto-translated captions.
 - Sort by fit / reordering YouTube results.
 - Results beyond the top 5, Shorts, ads, channels, playlists, mixes.

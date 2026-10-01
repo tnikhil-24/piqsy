@@ -23,3 +23,13 @@ Before chipping a search, ask Jev one question about the query: is this a search
 ## Blocked by
 
 - 04
+
+## Added 2026-10-01 (ADR 0005): broad vs narrow
+
+The same Jev request also asks whether the query is broad (a whole subject) or narrow (one concept).
+
+- [ ] One request, two `noul` questions (learning, broad); both probabilities logged; broad threshold is a named constant.
+- [ ] Format words ("full course", "tutorial", "for beginners", "explained", "crash course", "in one video") are removed to make the topic used for window scoring; if nothing is left, the original query. A pure, tested function.
+- [ ] The format words found are passed to the broad question as a hint.
+- [ ] Unsure (near threshold) or failed check → narrow.
+- [ ] Window scoring waits for the check (it runs while captions download, so normally no added delay); the topic, not the raw query, is sent to Jev. Narrow verdicts unchanged.
