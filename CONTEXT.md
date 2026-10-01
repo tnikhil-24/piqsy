@@ -1,0 +1,23 @@
+# Piqsy — Domain Glossary
+
+Use these terms exactly. Avoid the listed synonyms.
+
+| Term | Meaning | Avoid |
+|---|---|---|
+| **Query** | The raw text the user typed into YouTube search. | intent (until intent normalisation exists) |
+| **Learning query** | A query whose purpose is to learn a concept or skill, as judged by the learning-query check. Non-learning queries get no chips. | educational search |
+| **Result** | One regular video in YouTube's search results. Only the top 5 are evaluated. Shorts, ads, channels, playlists and mixes are not results. | item, card |
+| **Captions** | Timestamped English text of a video (creator-written or auto-generated; never auto-translated). | transcript (fine informally), subtitles |
+| **Window** | A contiguous time slice of captions (2 min by default, longer for long videos) scored by Jev. | chunk, segment |
+| **Window score** | Jev's `noul` probability that a window explains the query. | confidence, relevance score |
+| **Verdict** | The per-(query, video) outcome: **Great**, **Partial**, **Not covered**, **Unsure**. | rating, fit score |
+| **Great** | Watching from where the relevant section starts would teach the searcher what they searched for. The only loud state; false Greats are the worst error. | |
+| **Partial** | Covers the query, but you'd need another source. | |
+| **Not covered** | Piqsy read the captions and didn't find the query explained. | Skip |
+| **Unsure** | Piqsy read the captions and can't tell. Never used for failures. | |
+| **no captions** / **Piqsy error** | Piqsy couldn't check (no English captions / a failure). Not verdicts. | Unsure |
+| **Range** | A run of consecutive relevant windows, start shifted 10 s earlier. Up to 3 per video. | timestamp (a range has a start *and* end) |
+| **Relevant throughout** | Relevant windows cover ≥ 40% of the video; shown instead of ranges. | |
+| **Chip** | The badge on a search result's thumbnail (top-left). | badge (OK informally), pill |
+| **Strip** | The bar under the player on the watch page that lists ranges. | banner |
+| **Jev** | TypeSafe AI's decision model; see `docs/jev.md`. | the LLM, the AI |
