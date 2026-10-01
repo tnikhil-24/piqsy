@@ -1,6 +1,6 @@
 # 06 — Learning-query check (and broad vs narrow) and on/off switch
 
-Status: ready-for-human
+Status: done
 Type: AFK
 Blocked by: 04
 
@@ -14,11 +14,11 @@ Before chipping a search, ask Jev one question about the query: is this a search
 
 ## Acceptance criteria
 
-- [ ] "lofi music" and "funny cats" get no chips; "kafka consumer group rebalancing" and "adv java interview questions" do.
-- [ ] The check runs alongside caption fetches; total time to verdict doesn't increase.
-- [ ] Learning-query threshold is a named constant; the probability is logged.
-- [ ] Popup switch: off = no Piqsy on any search; on = automatic check applies. Setting persists.
-- [ ] If the check itself fails, fall back to chipping (don't silently hide Piqsy).
+- [x] "lofi music" and "funny cats" get no chips; "kafka consumer group rebalancing" and "adv java interview questions" do.
+- [x] The check runs alongside caption fetches; total time to verdict doesn't increase.
+- [x] Learning-query threshold is a named constant; the probability is logged.
+- [x] Popup switch: off = no Piqsy on any search; on = automatic check applies. Setting persists.
+- [x] If the check itself fails, fall back to chipping (don't silently hide Piqsy).
 
 ## Blocked by
 
@@ -28,11 +28,11 @@ Before chipping a search, ask Jev one question about the query: is this a search
 
 The same Jev request also asks whether the query is broad (a whole subject) or narrow (one concept).
 
-- [ ] One request, two `noul` questions (learning, broad); both probabilities logged; broad threshold is a named constant.
-- [ ] Format words ("full course", "tutorial", "for beginners", "explained", "crash course", "in one video") are removed to make the topic used for window scoring; if nothing is left, the original query. A pure, tested function.
-- [ ] The format words found are passed to the broad question as a hint.
-- [ ] Unsure (near threshold) or failed check → narrow.
-- [ ] Window scoring waits for the check (it runs while captions download, so normally no added delay); the topic, not the raw query, is sent to Jev. Narrow verdicts unchanged.
+- [x] One request, two `noul` questions (learning, broad); both probabilities logged; broad threshold is a named constant.
+- [x] Format words ("full course", "tutorial", "for beginners", "explained", "crash course", "in one video") are removed to make the topic used for window scoring; if nothing is left, the original query. A pure, tested function.
+- [x] The format words found are passed to the broad question as a hint.
+- [x] Unsure (near threshold) or failed check → narrow.
+- [x] Window scoring waits for the check (it runs while captions download, so normally no added delay); the topic, not the raw query, is sent to Jev. Narrow verdicts unchanged.
 
 ## Comments
 
@@ -51,4 +51,4 @@ Owner check (two searches, short videos fine): `lofi music` → no chips, consol
 
 - `lofi music`: learning 0.04, broad 0.76 → no chips. ✓
 - `kafka consumer group rebalancing`: learning 0.97, broad 0.48 → narrow, chips; all 5 Great (throughout), 1.0–1.3 s per video with saved captions. ✓
-- Still to check: popup switch off/on.
+- Popup switch: off removes chips, on brings them back. ✓
