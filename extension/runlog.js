@@ -7,9 +7,8 @@ const LOG_MAX = 2000; // ~300 bytes each, well under storage.local's 10 MB
 
 let logQueue = Promise.resolve();
 
-// Appends are chained so parallel checks in one tab don't overwrite each other.
-// ponytail: two tabs appending at the same instant can still lose an entry;
-// move this into the background worker once it exists (Jev slice).
+// Runs in the background worker only (the single writer for all tabs); appends
+// are chained so parallel evaluations don't overwrite each other.
 function appendLog(entry, storage = chrome.storage.local) {
   logQueue = logQueue
     .then(async () => {

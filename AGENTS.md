@@ -23,8 +23,8 @@ Single-context: one root `CONTEXT.md` plus `docs/adr/`. See `docs/agents/domain.
 
 ## Code and status
 
-- `extension/`: Manifest V3, plain JS, no build step. `content.js` (search page adapter + chips), `captions.js` (caption fetcher + per-tab cache), `runlog.js` (persistent run log), `options.html`/`options.js` (log export), `chip.css`.
-- Slices 01–03 done; next is 04 (Jev verdict). Status is the `Status:` line in each `.scratch/badge/issues/*.md`; a done slice is `Status: done`.
+- `extension/`: Manifest V3, plain JS, no build step. `content.js` (search page adapter, chips, per-video evaluation), `captions.js` (caption fetcher + per-tab cache), `windows.js` (windowing), `verdict.js` (verdict engine), `background.js` (service worker: the only Jev caller and run-log writer), `jev.js` (Jev client), `runlog.js` (persistent run log), `options.html`/`options.js` (Jev key, log export), `chip.css`.
+- Slices 01–03 done; 04 (Jev verdict) code done, awaiting the owner's Jev key and Chrome check. Status is the `Status:` line in each `.scratch/badge/issues/*.md`; a done slice is `Status: done`.
 
 ## Running and testing
 
@@ -33,6 +33,7 @@ Single-context: one root `CONTEXT.md` plus `docs/adr/`. See `docs/agents/domain.
 - Inspect: on a YouTube search page, open DevTools → Console and filter by `[piqsy]`. Ask the owner to paste only those lines; full console dumps are huge and get truncated.
 - Run log: Piqsy → Details → Extension options → "Export log as JSON" (storage key `runLog`, last 2000 evaluations). Use it to check failures (`detail`, e.g. timedtext 429) and latency over real searches.
 - Demo mode (all chip states): `localStorage.piqsyDemo = 1` in the console, then reload.
+- Background worker (Jev calls, run log): `chrome://extensions` → Piqsy → "service worker" link opens its own DevTools.
 - Logged out: Incognito needs "Allow in Incognito" in Piqsy's details.
 - Page adapters, views and caption fetching are checked manually in Chrome by the owner (PRD testing decisions).
 

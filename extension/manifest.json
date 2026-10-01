@@ -4,11 +4,13 @@
   "version": "0.1.0",
   "description": "Rates how well the top YouTube search results actually cover your query.",
   "permissions": ["storage"],
+  "host_permissions": ["https://api.typesafe.ai/*"],
+  "background": { "service_worker": "background.js" },
   "options_ui": { "page": "options.html", "open_in_tab": true },
   "content_scripts": [
     {
       "matches": ["https://www.youtube.com/*"],
-      "js": ["captions.js", "runlog.js", "content.js"],
+      "js": ["captions.js", "windows.js", "verdict.js", "content.js"],
       "css": ["chip.css"],
       "run_at": "document_idle"
     }

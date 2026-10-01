@@ -14,41 +14,93 @@ const STATES = {
   error: ['!', 'Piqsy error'],
 };
 
-// `text` overrides the state's label (slice 02 shows a caption line count).
-function setState(chip, state, text) {
-  if (!text) {
-    const [icon, word] = STATES[state];
-    text = icon ? `${icon} ${word}` : word;
-  }
+function setState(chip, state) {
+  const [icon, word] = STATES[state];
   chip.dataset.state = state;
-  chip.textContent = text;
+  chip.textContent = icon ? `${icon} ${word}` : word;
 }
 
-async function check(chip) {
+const ms = (t0) => Math.round(performance.now() - t0);
+
+// One evaluation of (query, video): captions -> windows -> Jev (via the
+// background worker) -> verdict. Logs one run-log entry; returns the chip state.
+async function evaluate(query, videoId) {
   const t0 = performance.now();
-  const { videoId } = chip.dataset;
   const { result, cached } = await getCaptions(videoId);
-  const ms = Math.round(performance.now() - t0);
+  const captionMs = ms(t0);
   const what = result.lines ? `${result.kind} ${result.lang}, ${result.lines.length} lines, ${result.durationSec}s video` : result.reason;
-  console.log(`[piqsy] captions ${videoId}: ${what}${result.detail ? ` (${result.detail})` : ''} in ${ms}ms${cached ? ' [cached]' : ''}`);
-  const outcome = result.lines ? 'captions' : result.reason === 'fetch failed' ? 'error' : 'no-captions';
-  appendLog({
+  console.log(`[piqsy] captions ${videoId}: ${what}${result.detail ? ` (${result.detail})` : ''} in ${captionMs}ms${cached ? ' [cached]' : ''}`);
+  const entry = {
     ts: new Date().toISOString(),
-    query: chip.dataset.query,
+    query,
     videoId,
-    outcome,
+    outcome: result.lines ? 'captions' : result.reason === 'fetch failed' ? 'error' : 'no-captions',
     reason: result.reason ?? null,
     detail: result.detail ?? null,
     kind: result.kind ?? null,
     lang: result.lang ?? null,
     lines: result.lines?.length ?? null,
     durationSec: result.durationSec ?? null,
-    captionMs: ms,
+    captionMs,
     cached,
-  });
-  if (!chip.isConnected) return;
-  if (result.lines) setState(chip, 'captions', `captions ✓ (${result.lines.length} lines)`);
-  else setState(chip, outcome);
+    verdict: null,
+    windows: null,
+    jevMs: null,
+    totalMs: null,
+    ranges: null,
+    scores: null,
+    jevError: null,
+  };
+
+  if (result.lines) {
+    const windows = makeWindows(result.lines, result.durationSec);
+    const t1 = performance.now();
+    let res;
+    try {
+      res = await chrome.runtime.sendMessage({ type: 'score', query, texts: windows.map((w) => w.text) });
+    } catch (e) {
+      res = { error: String(e) }; // e.g. extension reloaded under an open tab
+    }
+    Object.assign(entry, { windows: windows.length, jevMs: ms(t1) });
+    if (res.error) {
+      Object.assign(entry, { verdict: 'error', jevError: res.error });
+    } else {
+      const { verdict, ranges } = judge(windows.map((w, i) => ({ ...w, score: res.scores[i] })));
+      Object.assign(entry, { verdict, ranges, scores: res.scores.map((s) => Math.round(s * 1000) / 1000) });
+    }
+  }
+  entry.totalMs = ms(t0);
+  if (entry.verdict) {
+    console.log(`[piqsy] verdict ${videoId}: ${entry.verdict}${entry.jevError ? ` (${entry.jevError})` : ''}, ${entry.windows} windows, Jev ${entry.jevMs}ms, total ${entry.totalMs}ms`);
+  }
+  chrome.runtime.sendMessage({ type: 'log', entry }).catch((e) => console.warn('[piqsy] run log', e));
+  return entry.verdict || entry.outcome;
+}
+
+// YouTube re-renders results right after a search, dropping and re-adding
+// chips; this de-duplicates so each (query, video) is evaluated once per tab.
+// ponytail: in-memory per tab, like captionCache.
+const evaluations = new Map(); // `${query}\n${videoId}` -> Promise<state>
+
+function getEvaluation(query, videoId) {
+  const key = `${query}\n${videoId}`;
+  if (!evaluations.has(key)) {
+    evaluations.set(
+      key,
+      evaluate(query, videoId)
+        .catch((e) => (console.warn('[piqsy]', e), 'error'))
+        .then((state) => {
+          if (state === 'error') evaluations.delete(key); // retry next time
+          return state;
+        }),
+    );
+  }
+  return evaluations.get(key);
+}
+
+async function check(chip) {
+  const state = await getEvaluation(chip.dataset.query, chip.dataset.videoId);
+  if (chip.isConnected) setState(chip, state);
 }
 
 function makeChip(videoId, query) {

@@ -56,6 +56,10 @@ Rough cost: ~12k tokens per hour of speech → 1-hr video ≈ $0.0005, 24-hr vid
 - **Calibration:** "trained with RLCD to return calibrated decisions; outcomes assigned 0.8 should occur about 80% of the time" (for groups of predictions, not single answers). No published calibration metrics.
 - Weaker on step-by-step reasoning and specialised domains (third-party).
 
+## How Piqsy asks (slice 04)
+
+`extension/jev.js`: one request per window, `state` = the window's caption text, one question `{ explains: { type: "noul", instructions: "This transcript excerpt explains \"<query>\"." } }`, model `jev-latest`. Empty windows score 0 without a request. Concurrency 8 shared by all tabs (background worker). The wording is a first guess; the benchmark (slice 09) can test alternatives.
+
 ## Unknowns to check by measurement
 
 - Whether one request can score many windows at once (state holds several windows, one question per window) as accurately as one window per request.
