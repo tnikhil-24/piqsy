@@ -14,6 +14,10 @@ async function handle(msg) {
   if (msg.type === 'log') return appendLog(msg.entry);
   if (msg.type === 'saveCaptions') return saveCaptions(msg.videoId, msg.result);
   if (msg.type === 'loadCaptions') return { result: await loadCaptions(msg.videoId) };
+  // Ratings for the watch-page strip: chrome.storage.session lasts until the browser
+  // closes and is shared by tabs, so a result opened in a new tab still finds it.
+  if (msg.type === 'rated') return chrome.storage.session.set({ [`rated:${msg.videoId}`]: msg.rating });
+  if (msg.type === 'rating') return { rating: (await chrome.storage.session.get(`rated:${msg.videoId}`))[`rated:${msg.videoId}`] ?? null };
   if (msg.type === 'checkKey') {
     await askJev(msg.key, 'Piqsy key check.', { ok: { type: 'noul', instructions: 'This is a test.' } });
     return {};

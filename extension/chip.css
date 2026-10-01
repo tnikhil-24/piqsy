@@ -60,3 +60,35 @@ ytd-thumbnail {
     opacity: 0.6;
   }
 }
+
+/* Watch-page strip: under the player, on YouTube's own page background, so it
+   uses YouTube's theme variables (light and dark). */
+.piqsy-strip {
+  margin: 12px 0 0;
+  color: var(--yt-spec-text-primary, #0f0f0f);
+  font: 400 14px/28px Roboto, Arial, sans-serif;
+}
+
+.piqsy-strip[data-state='great'] {
+  font-weight: 500;
+}
+
+.piqsy-strip button {
+  margin: 0 2px;
+  padding: 0 10px;
+  border: 1px solid transparent;
+  border-radius: 14px;
+  background: var(--yt-spec-badge-chip-background, rgba(0, 0, 0, 0.05));
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+}
+
+.piqsy-strip button:hover {
+  background: var(--yt-spec-10-percent-layer, rgba(0, 0, 0, 0.1));
+}
+
+.piqsy-strip button.strongest {
+  border-color: currentColor;
+  font-weight: 700;
+}

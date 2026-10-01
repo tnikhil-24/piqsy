@@ -146,6 +146,13 @@ async function evaluate(query, videoId) {
     console.log(`[piqsy] verdict ${videoId} (${entry.kind}): ${entry.verdict}${entry.jevError ? ` (${entry.jevError})` : ''}, ${entry.windows} windows${entry.fineWindows ? ` + ${entry.fineWindows} fine` : ''}${entry.throughout ? ', throughout' : ''}, Jev ${entry.jevMs}ms, total ${entry.totalMs}ms`);
   }
   await appendLog(entry);
+  // For the watch-page strip. ponytail: the latest rating of a video wins, whichever search it came from.
+  if (best) {
+    const ranges = entry.ranges.length || entry.throughout ? entry.ranges : [{ start: best.start, end: best.end, strongest: true }]; // Partial below RANGE_MIN: its best window
+    const rating = { query, verdict: entry.verdict, ranges, throughout: entry.throughout };
+    chrome.runtime.sendMessage({ type: 'rated', videoId, rating }).catch(() => {});
+    if (strip.videoId === videoId && !strip.el) (strip.el = makeStrip(rating)), schedule(); // result clicked while its chip was pending
+  }
   const state = entry.verdict || entry.outcome;
   return { state, hover: hoverText({ state, best, kind: entry.kind, reason: entry.reason, why: entry.jevError || entry.detail }) };
 }
@@ -260,8 +267,57 @@ function sync() {
   }
 }
 
+// Watch-page strip under the player, for Great / Partial videos rated by a
+// search this browser session. Looked up once per watched video.
+let strip = { videoId: null, el: null };
+
+function makeStrip({ query, verdict, ranges, throughout }) {
+  if (verdict !== 'great' && verdict !== 'partial') return null;
+  const el = document.createElement('div');
+  el.className = 'piqsy-strip';
+  el.dataset.state = verdict;
+  el.title = `Piqsy, for your search "${query}"`;
+  const [icon, word] = STATES[verdict];
+  el.append(`${icon} ${word} · `, throughout ? 'Relevant throughout' : 'Watch ');
+  if (!throughout) {
+    ranges.forEach((r, i) => {
+      if (i) el.append(' · ');
+      const b = document.createElement('button');
+      b.textContent = `${clock(r.start)}–${clock(r.end)}`;
+      if (r.strongest) b.className = 'strongest';
+      b.onclick = () => {
+        const video = document.querySelector('video.html5-main-video');
+        if (!video) return;
+        video.currentTime = r.start;
+        video.play().catch(() => {});
+      };
+      el.append(b);
+    });
+  }
+  return el;
+}
+
+function syncStrip() {
+  const videoId = enabled && location.pathname === '/watch' ? new URLSearchParams(location.search).get('v') : null;
+  if (videoId !== strip.videoId) {
+    strip.el?.remove();
+    strip = { videoId, el: null };
+    if (!videoId) return;
+    chrome.runtime
+      .sendMessage({ type: 'rating', videoId })
+      .then(({ rating }) => {
+        if (strip.videoId === videoId && rating) (strip.el = makeStrip(rating)), schedule();
+      })
+      .catch(() => {});
+  }
+  // YouTube re-renders the page around the player; put the strip back if it was dropped.
+  const below = document.querySelector('ytd-watch-flexy #below');
+  if (strip.el && below && strip.el.parentElement !== below) below.prepend(strip.el);
+}
+
 function safeSync() {
   try {
+    syncStrip();
     sync();
   } catch (e) {
     console.warn('[piqsy]', e); // never let Piqsy break YouTube

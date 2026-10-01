@@ -1,6 +1,6 @@
 # 07 — Watch-page strip with clickable ranges
 
-Status: ready-for-agent
+Status: ready-for-human
 Type: AFK
 Blocked by: 04
 
@@ -28,3 +28,12 @@ When the owner clicks a result Piqsy rated Great or Partial, the watch page show
 ## Comments
 
 **2026-10-01, from slices 05 and ADR 0005:** `judge` in `extension/verdict.js` already returns `ranges` (refined by the 2-minute second pass on long videos) and `throughout`; both are in the run log. This slice needs a per-video session store of `{ query, verdict, ranges, throughout }` and the strip. Broad-query Greats (issue 12) are always `throughout`, so they show "Relevant throughout", no ranges.
+
+**2026-10-01, built (awaiting the owner's check).**
+
+- Store: each judged video's `{ query, verdict, ranges, throughout }` goes to `chrome.storage.session` (key `rated:<videoId>`) through the background worker. It lasts until the browser closes and is shared by tabs, so a result opened in a new tab (Ctrl/middle-click) also gets the strip. The latest rating of a video wins, whichever search it came from.
+- Strip: prepended to `ytd-watch-flexy #below` (under the player), looked up once per watched video and put back if YouTube re-renders. `✓ Great · Watch 4:18–9:40 · 31:02–35:10`, or `· Relevant throughout`. Strongest range bold with an outline. Clicking sets `currentTime` on the main `<video>` and plays; the video still opens at 0:00. Tooltip names the search it came from.
+- A Partial with no window ≥ 0.7 (so no ranges) shows its best window as its one range.
+- Clicking a result while its chip is still pending: the strip appears when the evaluation finishes (same tab only).
+- Theme: YouTube's own CSS variables (`--yt-spec-text-primary`, `--yt-spec-badge-chip-background`).
+- Popup switch off hides the strip too.
