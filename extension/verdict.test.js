@@ -1,7 +1,7 @@
 // node --test
 const test = require('node:test');
 const assert = require('node:assert');
-const { judge } = require('./verdict.js');
+const { judge, refine } = require('./verdict.js');
 
 // scores -> 2-minute windows from 0
 const w = (...scores) => scores.map((score, i) => ({ start: i * 120, end: (i + 1) * 120, score }));
@@ -30,7 +30,7 @@ test('a short one-window video can be Great on its own score', () => {
 });
 
 test('ranges: runs >= 0.7, strongest 3 in time order, start 10 s early clamped at 0', () => {
-  const { ranges } = judge(w(0.8, 0.75, 0.1, 0.72, 0.1, 0.95, 0.1, 0.71, 0.1));
+  const { ranges } = judge(w(0.8, 0.75, 0.1, 0.72, 0.1, 0.95, 0.1, 0.71, 0.1, 0.1, 0.1, 0.1, 0.1));
   assert.deepEqual(ranges, [
     { start: 0, end: 240, peak: 0.8, strongest: false },
     { start: 350, end: 480, peak: 0.72, strongest: false },
@@ -40,4 +40,32 @@ test('ranges: runs >= 0.7, strongest 3 in time order, start 10 s early clamped a
 
 test('no ranges when nothing reaches 0.7', () => {
   assert.deepEqual(judge(w(0.69, 0.5)).ranges, []);
+});
+
+test('relevant throughout at 40% of the video: no ranges', () => {
+  const at = judge(w(0.9, 0.8, 0.1, 0.1, 0.1)); // 240 of 600 s
+  assert.equal(at.throughout, true);
+  assert.deepEqual(at.ranges, []);
+  const below = judge([...w(0.9, 0.8, 0.1, 0.1), { start: 480, end: 601, score: 0.1 }]); // 240 of 601 s
+  assert.equal(below.throughout, false);
+  assert.equal(below.ranges.length, 1);
+});
+
+test('bestWindow is the highest-scoring window', () => {
+  const ws = w(0.2, 0.9, 0.95, 0.1);
+  assert.equal(judge(ws).bestWindow, ws[2]);
+  assert.equal(judge([]).bestWindow, null);
+});
+
+test('refine: fine 2-minute windows inside the best wide window set the range', () => {
+  const ws = [0.1, 0.9, 0.1, 0.1, 0.1].map((score, i) => ({ start: i * 1440, end: (i + 1) * 1440, score }));
+  const fine = [0.2, 0.75, 0.88, 0.3].map((score, i) => ({ start: 1440 + i * 120, end: 1440 + (i + 1) * 120, score }));
+  assert.deepEqual(refine(ws, ws[1], fine), [{ start: 1550, end: 1800, peak: 0.88, strongest: true }]);
+});
+
+test('refine keeps the wide window when no fine window reaches the range threshold', () => {
+  const ws = w(0.1, 0.9, 0.1);
+  assert.deepEqual(refine(ws, ws[1], [{ start: 120, end: 180, score: 0.5 }, { start: 180, end: 240, score: 0.6 }]), [
+    { start: 110, end: 240, peak: 0.9, strongest: true },
+  ]);
 });

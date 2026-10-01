@@ -8,6 +8,7 @@ const NOT_COVERED_MAX = 0.3; // Not covered: every window below this.
 const RANGE_MIN = 0.7; // windows at or above this form ranges
 const MAX_RANGES = 3;
 const RANGE_LEAD_SEC = 10; // start ranges early: landing early is fine, late is not
+const THROUGHOUT_SHARE = 0.4; // relevant (>= RANGE_MIN) windows covering this much of the video: no ranges
 
 function verdictOf(scores) {
   if (!scores.length) return 'unsure';
@@ -36,8 +37,19 @@ function rangesOf(windows) {
     .sort((a, b) => a.start - b.start);
 }
 
+// Windows tile the video, so their spans give its duration.
 function judge(windows) {
-  return { verdict: verdictOf(windows.map((w) => w.score)), ranges: rangesOf(windows) };
+  const span = (ws) => ws.reduce((sum, w) => sum + w.end - w.start, 0);
+  const throughout = windows.length > 0 && span(windows.filter((w) => w.score >= RANGE_MIN)) >= THROUGHOUT_SHARE * span(windows);
+  const bestWindow = windows.reduce((best, w) => (!best || w.score > best.score ? w : best), null);
+  return { verdict: verdictOf(windows.map((w) => w.score)), ranges: throughout ? [] : rangesOf(windows), throughout, bestWindow };
 }
 
-if (typeof module === 'object') module.exports = { judge, GREAT_PEAK, GREAT_SUPPORT, PARTIAL_PEAK, NOT_COVERED_MAX, RANGE_MIN, MAX_RANGES, RANGE_LEAD_SEC };
+// Second pass: ranges with the wide best window swapped for its scored 2-minute
+// windows. If none of those reaches RANGE_MIN, the wide window stays.
+function refine(windows, best, fine) {
+  const inner = fine.some((f) => f.score >= RANGE_MIN) ? fine : [best];
+  return rangesOf(windows.flatMap((w) => (w === best ? inner : [w])));
+}
+
+if (typeof module === 'object') module.exports = { judge, refine, THROUGHOUT_SHARE, GREAT_PEAK, GREAT_SUPPORT, PARTIAL_PEAK, NOT_COVERED_MAX, RANGE_MIN, MAX_RANGES, RANGE_LEAD_SEC };

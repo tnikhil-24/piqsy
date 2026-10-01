@@ -21,6 +21,16 @@ function setState(chip, state) {
 }
 
 const ms = (t0) => Math.round(performance.now() - t0);
+const rounded = (scores) => scores.map((s) => Math.round(s * 1000) / 1000);
+
+// Jev scores for windows, via the background worker: { scores } or { error }.
+async function score(query, windows) {
+  try {
+    return await chrome.runtime.sendMessage({ type: 'score', query, texts: windows.map((w) => w.text) });
+  } catch (e) {
+    return { error: String(e) }; // e.g. extension reloaded under an open tab
+  }
+}
 
 // One evaluation of (query, video): captions -> windows -> Jev (via the
 // background worker) -> verdict. Logs one run-log entry; returns the chip state.
@@ -51,30 +61,38 @@ async function evaluate(query, videoId) {
     jevMs: null,
     totalMs: null,
     ranges: null,
+    throughout: null,
     scores: null,
+    fineWindows: null,
+    fineScores: null,
     jevError: null,
   };
 
   if (result.lines) {
     const windows = makeWindows(result.lines, result.durationSec);
     const t1 = performance.now();
-    let res;
-    try {
-      res = await chrome.runtime.sendMessage({ type: 'score', query, texts: windows.map((w) => w.text) });
-    } catch (e) {
-      res = { error: String(e) }; // e.g. extension reloaded under an open tab
-    }
+    const res = await score(query, windows);
     Object.assign(entry, { windows: windows.length, jevMs: ms(t1) });
     if (res.error) {
       Object.assign(entry, { verdict: 'error', jevError: res.error });
     } else {
-      const { verdict, ranges } = judge(windows.map((w, i) => ({ ...w, score: res.scores[i] })));
-      Object.assign(entry, { verdict, ranges, scores: res.scores.map((s) => Math.round(s * 1000) / 1000) });
+      const scored = windows.map((w, i) => ({ ...w, score: res.scores[i] }));
+      const { verdict, ranges, throughout, bestWindow } = judge(scored);
+      Object.assign(entry, { verdict, ranges, throughout, scores: rounded(res.scores) });
+      // Second pass (long videos): 2-minute windows inside a wide best window.
+      const fine = verdict === 'great' || verdict === 'partial' ? fineWindows(result.lines, bestWindow) : [];
+      if (!throughout && fine.length > 1) {
+        const res2 = await score(query, fine);
+        Object.assign(entry, { fineWindows: fine.length, jevMs: ms(t1) });
+        // ponytail: a failed second pass keeps the first-pass ranges; the error is logged.
+        if (res2.error) entry.jevError = res2.error;
+        else Object.assign(entry, { ranges: refine(scored, bestWindow, fine.map((w, i) => ({ ...w, score: res2.scores[i] }))), fineScores: rounded(res2.scores) });
+      }
     }
   }
   entry.totalMs = ms(t0);
   if (entry.verdict) {
-    console.log(`[piqsy] verdict ${videoId}: ${entry.verdict}${entry.jevError ? ` (${entry.jevError})` : ''}, ${entry.windows} windows, Jev ${entry.jevMs}ms, total ${entry.totalMs}ms`);
+    console.log(`[piqsy] verdict ${videoId}: ${entry.verdict}${entry.jevError ? ` (${entry.jevError})` : ''}, ${entry.windows} windows${entry.fineWindows ? ` + ${entry.fineWindows} fine` : ''}${entry.throughout ? ', throughout' : ''}, Jev ${entry.jevMs}ms, total ${entry.totalMs}ms`);
   }
   try {
     await chrome.runtime.sendMessage({ type: 'log', entry });
