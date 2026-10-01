@@ -116,3 +116,12 @@ test('hoverText: plain explanations for not covered, no captions, error', () => 
   assert.match(hoverText({ state: 'no-captions', reason: 'not English' }), /No English captions/);
   assert.equal(hoverText({ state: 'error', why: 'Jev HTTP 401' }), "Piqsy couldn't check this video: Jev HTTP 401");
 });
+
+test('relevant throughout but starting late: from = first relevant window, minus the lead', () => {
+  const { RANGE_LEAD_SEC } = require('./verdict.js');
+  // udJ0ZJf97w8 (kafka, 2026-10-01): 4 weak windows, then relevant from 8:00
+  const late = judge(w(0.17, 0.03, 0.12, 0.3, 0.94, 0.97, 0.87, 0.85, 0.92));
+  assert.deepEqual([late.throughout, late.from], [true, 480 - RANGE_LEAD_SEC]);
+  assert.equal(judge(w(0.9, 0.9, 0.1)).from, 0);
+  assert.equal(judge(w(0.9, 0.1, 0.1, 0.1, 0.1)).from, null); // not throughout
+});

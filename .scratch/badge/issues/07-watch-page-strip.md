@@ -39,3 +39,5 @@ When the owner clicks a result Piqsy rated Great or Partial, the watch page show
 - Popup switch off hides the strip too.
 
 **2026-10-01, owner check 1.** `data structures and algorithms full course` → Sajjaad Khader's `O9v10jQkm5c` (broad Great, 8 windows) showed `✓ Great · Relevant throughout` under the player. Text was unreadable (theme variable mismatch, fixed above). Ranges, seeking, navigation and new-tab not yet checked; a YouTube block (timedtext 429) hit during the same search.
+
+**2026-10-01, "Relevant from".** The run log showed `udJ0ZJf97w8` (kafka) as relevant throughout (5 of 9 windows) though its first 8 minutes scored 0.03–0.30, so the strip said "Relevant throughout" with nothing to click. Now `judge` returns `from` (first relevant window's start minus the 10 s lead) and the strip shows `✓ Great · Relevant from 7:50` with the time as a clickable range; "Relevant throughout" only when relevance starts at the beginning. `from` is also in the run log. Owner agreed.

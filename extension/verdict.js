@@ -51,7 +51,9 @@ function judge(windows, kind = 'narrow') {
   const throughout = share(broad ? BROAD_GREAT_SHARE : THROUGHOUT_SHARE);
   const scores = windows.map((w) => w.score);
   const bestWindow = windows.reduce((best, w) => (!best || w.score > best.score ? w : best), null);
-  return { verdict: verdictOf(scores, broad ? throughout : narrowGreat(scores)), ranges: throughout ? [] : rangesOf(windows), throughout, bestWindow };
+  // Relevant throughout but starting late (e.g. an 8-minute intro): where the relevant part begins.
+  const from = throughout ? Math.max(0, windows.find((w) => w.score >= RANGE_MIN).start - RANGE_LEAD_SEC) : null;
+  return { verdict: verdictOf(scores, broad ? throughout : narrowGreat(scores)), ranges: throughout ? [] : rangesOf(windows), throughout, from, bestWindow };
 }
 
 // Second pass: ranges with the wide best window swapped for its scored 2-minute

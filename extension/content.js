@@ -123,8 +123,8 @@ async function evaluate(query, videoId) {
       Object.assign(entry, { verdict: 'error', jevError: res.error });
     } else {
       const scored = windows.map((w, i) => ({ ...w, score: res.scores[i] }));
-      const { verdict, ranges, throughout, bestWindow } = judge(scored, entry.kind);
-      Object.assign(entry, { verdict, ranges, throughout, scores: rounded(res.scores) });
+      const { verdict, ranges, throughout, from, bestWindow } = judge(scored, entry.kind);
+      Object.assign(entry, { verdict, ranges, throughout, from, scores: rounded(res.scores) });
       best = bestWindow;
       // Second pass (long videos): 2-minute windows inside a wide best window.
       const fine = verdict === 'great' || verdict === 'partial' ? fineWindows(result.lines, bestWindow) : [];
@@ -149,7 +149,7 @@ async function evaluate(query, videoId) {
   // For the watch-page strip. ponytail: the latest rating of a video wins, whichever search it came from.
   if (best) {
     const ranges = entry.ranges.length || entry.throughout ? entry.ranges : [{ start: best.start, end: best.end, strongest: true }]; // Partial below RANGE_MIN: its best window
-    const rating = { query, verdict: entry.verdict, ranges, throughout: entry.throughout };
+    const rating = { query, verdict: entry.verdict, ranges, throughout: entry.throughout, from: entry.from };
     chrome.runtime.sendMessage({ type: 'rated', videoId, rating }).catch(() => {});
     if (strip.videoId === videoId && !strip.el) (strip.el = makeStrip(rating)), schedule(); // result clicked while its chip was pending
   }
@@ -271,28 +271,31 @@ function sync() {
 // search this browser session. Looked up once per watched video.
 let strip = { videoId: null, el: null };
 
-function makeStrip({ query, verdict, ranges, throughout }) {
+function makeStrip({ query, verdict, ranges, throughout, from }) {
   if (verdict !== 'great' && verdict !== 'partial') return null;
   const el = document.createElement('div');
   el.className = 'piqsy-strip';
   el.dataset.state = verdict;
   el.title = `Piqsy, for your search "${query}"`;
   const [icon, word] = STATES[verdict];
-  el.append(`${icon} ${word} · `, throughout ? 'Relevant throughout' : 'Watch ');
-  if (!throughout) {
-    ranges.forEach((r, i) => {
-      if (i) el.append(' · ');
-      const b = document.createElement('button');
-      b.textContent = `${clock(r.start)}–${clock(r.end)}`;
-      if (r.strongest) b.className = 'strongest';
-      b.onclick = () => {
-        const video = document.querySelector('video.html5-main-video');
-        if (!video) return;
-        video.currentTime = r.start;
-        video.play().catch(() => {});
-      };
-      el.append(b);
-    });
+  const button = (text, start, strongest) => {
+    const b = document.createElement('button');
+    b.textContent = text;
+    if (strongest) b.className = 'strongest';
+    b.onclick = () => {
+      const video = document.querySelector('video.html5-main-video');
+      if (!video) return;
+      video.currentTime = start;
+      video.play().catch(() => {});
+    };
+    return b;
+  };
+  el.append(`${icon} ${word} · `);
+  if (throughout && from) el.append('Relevant from ', button(clock(from), from, true));
+  else if (throughout) el.append('Relevant throughout');
+  else {
+    el.append('Watch ');
+    ranges.forEach((r, i) => el.append(...(i ? [' · '] : []), button(`${clock(r.start)}–${clock(r.end)}`, r.start, r.strongest)));
   }
   return el;
 }
