@@ -74,7 +74,11 @@ async function evaluate(query, videoId) {
   if (entry.verdict) {
     console.log(`[piqsy] verdict ${videoId}: ${entry.verdict}${entry.jevError ? ` (${entry.jevError})` : ''}, ${entry.windows} windows, Jev ${entry.jevMs}ms, total ${entry.totalMs}ms`);
   }
-  chrome.runtime.sendMessage({ type: 'log', entry }).catch((e) => console.warn('[piqsy] run log', e));
+  try {
+    await chrome.runtime.sendMessage({ type: 'log', entry });
+  } catch (e) {
+    console.warn('[piqsy] run log', e);
+  }
   return entry.verdict || entry.outcome;
 }
 
@@ -156,6 +160,9 @@ function isStale(query, ids) {
 // Idempotent: YouTube recycles renderer elements across searches, so a chip
 // stays only while its thumbnail still shows the same video for the same query.
 function sync() {
+  // After ↻ on the extension, this old copy can't reach the background worker;
+  // stay idle (no wasted YouTube requests) until the tab is reloaded.
+  if (!chrome.runtime?.id) return;
   if (location.pathname !== '/results') return;
   const query = new URLSearchParams(location.search).get('search_query') || '';
   const results = topResults();
