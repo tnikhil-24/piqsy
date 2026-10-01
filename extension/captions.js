@@ -52,14 +52,14 @@ async function fetchCaptions(videoId) {
     const headers = { 'Content-Type': 'application/json' };
     const auth = mode === 2 && (await sapisidHash());
     if (auth) Object.assign(headers, { Authorization: auth, 'X-Origin': location.origin, 'X-Goog-AuthUser': '0' });
-    const player = await (
-      await fetch('https://www.youtube.com/youtubei/v1/player?prettyPrint=false', {
-        method: 'POST',
-        credentials,
-        headers,
-        body: JSON.stringify({ context: { client: PLAYER_CLIENT }, videoId }),
-      })
-    ).json();
+    const playerRes = await fetch('https://www.youtube.com/youtubei/v1/player?prettyPrint=false', {
+      method: 'POST',
+      credentials,
+      headers,
+      body: JSON.stringify({ context: { client: PLAYER_CLIENT }, videoId }),
+    });
+    const player = await playerRes.json();
+    if (player.error) return { reason: 'fetch failed', detail: `player HTTP ${playerRes.status}: ${player.error.status || ''} ${player.error.message || ''}` };
     const status = player.playabilityStatus?.status;
     if (status !== 'OK') return { reason: 'fetch failed', detail: `player ${status}: ${player.playabilityStatus?.reason || ''}` };
 
