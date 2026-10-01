@@ -1,6 +1,6 @@
 # 08 — Hover snippet on the chip
 
-Status: ready-for-human
+Status: done
 Type: AFK
 Blocked by: 04
 
@@ -14,11 +14,11 @@ Hovering a verdict chip on the search page shows the caption text of the best-sc
 
 ## Acceptance criteria
 
-- [ ] Hover on Great / Partial / Unsure shows the best window's caption text (trimmed to a readable length).
-- [ ] Not covered, no captions and error show a short plain explanation instead.
-- [ ] Hover card doesn't block clicking the result or YouTube's own hover preview controls.
-- [ ] Legible on light and dark themes.
-- [ ] Once issue 12 is in: one line saying which kind was assumed, "Judged as: whole subject" or "Judged as: one topic" (ADR 0005).
+- [x] Hover on Great / Partial / Unsure shows the best window's caption text (trimmed to a readable length).
+- [x] Not covered, no captions and error show a short plain explanation instead.
+- [x] Hover card doesn't block clicking the result or YouTube's own hover preview controls.
+- [x] Legible on light and dark themes.
+- [x] Once issue 12 is in: one line saying which kind was assumed, "Judged as: whole subject" or "Judged as: one topic" (ADR 0005).
 
 ## Blocked by
 
@@ -33,3 +33,5 @@ Hovering a verdict chip on the search page shows the caption text of the best-sc
 - Great / Partial / Unsure: `Best part 4:18–6:18: "<caption text>"`, trimmed at a word to 280 characters (`SNIPPET_MAX`), then `Judged as: one topic` / `whole subject`. The best window is the second pass's best 2-minute window when it ran, else the first pass's best window (up to ~25 min; its first 280 characters may be intro to the relevant part).
 - Not covered: plain sentence plus the kind. No captions: "This video has no captions" / "No English captions". Error: "Piqsy couldn't check this video: <detail>".
 - Skipped: a styled card. Add it if the native tooltip proves too plain (it appears after ~1 s and can't be styled).
+
+**2026-10-01, owner check.** Snippets read as real evidence. The tooltip is "kinda too plain, but no need for now". Snippets follow the fixed 2-minute grid, not where the explanation starts and ends; recorded in `docs/future-plans.md`.
