@@ -65,3 +65,5 @@ Ruled out: rotating IPs/proxies to dodge the check (evades YouTube's abuse detec
 - **Owner check:** search once, reload the tab, search again: the second run's lines say `[cached]` and no requests go out. Watch the next 10 s stall's `player`/`text` split.
 
 **2026-10-01, from slice 05 owner check (run log 19:36 UTC):** the 10 s stall is in the **timedtext** request, not the player: `RpLnQnurpLY` (1.2 h, 1,912 lines) player 294 ms, text 10,328 ms. Size doesn't explain it (a 4 h video's 6,018 lines took 0.8 s). Again the slowest of 5 parallel fetches. Next idea: a timeout plus one retry on timedtext after ~3 s, and check whether it's always the 5th concurrent request. The "search, reload, search again → `[cached]`" owner check is still to do.
+
+**2026-10-01, during the slice 07 check.** Another block (timedtext 429, 1103 bytes) on one `data structures and algorithms full course` search: 2 videos from saved captions, 3 long ones fetched and all got 429. Earlier that day the same machine fetched the 4–12.5 h courses for the slice 12 check. The 30 min pause triggered as designed.

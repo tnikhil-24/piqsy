@@ -61,11 +61,16 @@ ytd-thumbnail {
   }
 }
 
-/* Watch-page strip: under the player, on YouTube's own page background, so it
-   uses YouTube's theme variables (light and dark). */
+/* Watch-page strip under the player. YouTube's theme variables don't match
+   every layout (the area under the player can be dark in the light theme), so
+   like the chip it carries its own dark backing. */
 .piqsy-strip {
+  display: inline-block;
   margin: 12px 0 0;
-  color: var(--yt-spec-text-primary, #0f0f0f);
+  padding: 2px 10px;
+  border-radius: 16px;
+  background: rgba(0, 0, 0, 0.75);
+  color: #fff;
   font: 400 14px/28px Roboto, Arial, sans-serif;
 }
 
@@ -78,17 +83,18 @@ ytd-thumbnail {
   padding: 0 10px;
   border: 1px solid transparent;
   border-radius: 14px;
-  background: var(--yt-spec-badge-chip-background, rgba(0, 0, 0, 0.05));
+  background: rgba(255, 255, 255, 0.15);
   color: inherit;
   font: inherit;
+  line-height: 22px;
   cursor: pointer;
 }
 
 .piqsy-strip button:hover {
-  background: var(--yt-spec-10-percent-layer, rgba(0, 0, 0, 0.1));
+  background: rgba(255, 255, 255, 0.3);
 }
 
 .piqsy-strip button.strongest {
-  border-color: currentColor;
+  border-color: #fff;
   font-weight: 700;
 }

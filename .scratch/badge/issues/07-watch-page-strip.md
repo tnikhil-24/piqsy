@@ -35,5 +35,7 @@ When the owner clicks a result Piqsy rated Great or Partial, the watch page show
 - Strip: prepended to `ytd-watch-flexy #below` (under the player), looked up once per watched video and put back if YouTube re-renders. `✓ Great · Watch 4:18–9:40 · 31:02–35:10`, or `· Relevant throughout`. Strongest range bold with an outline. Clicking sets `currentTime` on the main `<video>` and plays; the video still opens at 0:00. Tooltip names the search it came from.
 - A Partial with no window ≥ 0.7 (so no ranges) shows its best window as its one range.
 - Clicking a result while its chip is still pending: the strip appears when the evaluation finishes (same tab only).
-- Theme: YouTube's own CSS variables (`--yt-spec-text-primary`, `--yt-spec-badge-chip-background`).
+- Theme: first built with YouTube's CSS variables; the owner's check showed dark-grey text on the dark area under the player (light theme, new layout). Now a dark translucent backing with white text, like the chip.
 - Popup switch off hides the strip too.
+
+**2026-10-01, owner check 1.** `data structures and algorithms full course` → Sajjaad Khader's `O9v10jQkm5c` (broad Great, 8 windows) showed `✓ Great · Relevant throughout` under the player. Text was unreadable (theme variable mismatch, fixed above). Ranges, seeking, navigation and new-tab not yet checked; a YouTube block (timedtext 429) hit during the same search.
