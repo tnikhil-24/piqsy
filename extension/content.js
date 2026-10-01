@@ -31,9 +31,24 @@ async function check(chip) {
   const ms = Math.round(performance.now() - t0);
   const what = result.lines ? `${result.kind} ${result.lang}, ${result.lines.length} lines, ${result.durationSec}s video` : result.reason;
   console.log(`[piqsy] captions ${videoId}: ${what}${result.detail ? ` (${result.detail})` : ''} in ${ms}ms${cached ? ' [cached]' : ''}`);
+  const outcome = result.lines ? 'captions' : result.reason === 'fetch failed' ? 'error' : 'no-captions';
+  appendLog({
+    ts: new Date().toISOString(),
+    query: chip.dataset.query,
+    videoId,
+    outcome,
+    reason: result.reason ?? null,
+    detail: result.detail ?? null,
+    kind: result.kind ?? null,
+    lang: result.lang ?? null,
+    lines: result.lines?.length ?? null,
+    durationSec: result.durationSec ?? null,
+    captionMs: ms,
+    cached,
+  });
   if (!chip.isConnected) return;
   if (result.lines) setState(chip, 'captions', `captions ✓ (${result.lines.length} lines)`);
-  else setState(chip, result.reason === 'fetch failed' ? 'error' : 'no-captions');
+  else setState(chip, outcome);
 }
 
 function makeChip(videoId, query) {

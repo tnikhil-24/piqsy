@@ -23,8 +23,8 @@ Single-context: one root `CONTEXT.md` plus `docs/adr/`. See `docs/agents/domain.
 
 ## Code and status
 
-- `extension/`: Manifest V3, plain JS, no build step. `content.js` (search page adapter + chips), `captions.js` (caption fetcher + per-tab cache), `chip.css`.
-- Slices 01 and 02 done; next is 03 (run log). Status is the `Status:` line in each `.scratch/badge/issues/*.md`; a done slice is `Status: done`.
+- `extension/`: Manifest V3, plain JS, no build step. `content.js` (search page adapter + chips), `captions.js` (caption fetcher + per-tab cache), `runlog.js` (persistent run log), `options.html`/`options.js` (log export), `chip.css`.
+- Slices 01–03 done; next is 04 (Jev verdict). Status is the `Status:` line in each `.scratch/badge/issues/*.md`; a done slice is `Status: done`.
 
 ## Running and testing
 
