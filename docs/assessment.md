@@ -26,6 +26,7 @@ Summary of the initial founding-engineer review of `piqsy_product_audit (1).md`.
 - **Language:** much popular CS teaching content is Hindi/Hinglish; V1 is English-only. The run log will show how often that bites.
 - **Entry points:** many learners start on Google, not YouTube search.
 - **Benchmark statistics:** size the test set by the number of predicted Greats needed to support a precision claim (29/30 correct only proves ~83% at 95% confidence).
+- **Broad and format queries ("X full course") fit window scoring badly (owner, 2026-10-01).** For `data structures and algorithms full course`, the owner preferred Sajjaad Khader's 15:51 overview (`O9v10jQkm5c`): Piqsy said Unsure (windows 0.24–0.54). The 4–12.5 h courses got Partial, mostly from one intro window that says "in this full course…" (e.g. `CBYHwZcbD-s`: 0.76 at 0:00, the rest ≤ 0.57). Jev is asked whether a 2-minute excerpt explains "<query>", so format words ("full course", "tutorial", "for beginners") are matched as if they were the topic, and no excerpt can explain a whole course. Also, which video teaches *better* (style, structure) is a preference Piqsy doesn't judge; it judges coverage and where. Options: strip format words before asking Jev; treat broad queries as whole-video questions; let the benchmark (slice 09, "broad queries") decide.
 - **Timestamp error is asymmetric:** landing early is fine, landing late is bad.
 
 ## Deliberately cut from the audit (for now)

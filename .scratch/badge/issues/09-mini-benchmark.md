@@ -31,3 +31,5 @@ About 50 hand-labelled cases `(query, video, label, relevant start)` covering sh
 
 **2026-10-01, owner decision:** video length doesn't matter; a very good 2-minute video deserves Great. A one-window video (under about 3 min) is now Great on its own score (≥ `GREAT_PEAK`), and a leftover piece under 1 minute joins the last window. This changes the PRD's Great rule (adjacent support) for one-window videos only. Watch short videos for false Greats here.
 - Confirmed in Chrome 2026-10-01: `U7_C8llyoGE` (95 s, one window) → Great.
+
+**2026-10-01, from slice 05 owner check:** include `data structures and algorithms full course` as a broad-query case. Owner labels Sajjaad Khader's `O9v10jQkm5c` (15:51) as a good result; Piqsy said Unsure while full courses got Partial from their intros. See `docs/assessment.md` (broad and format queries).
