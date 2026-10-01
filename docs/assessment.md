@@ -10,8 +10,8 @@ Summary of the initial founding-engineer review of `piqsy_product_audit (1).md`.
 
 ## Existential risks
 
-1. **Caption access from the search page.** No official API for other people's captions. Fetching for results the player hasn't loaded means extra requests from the user's logged-in session; YouTube has been tightening this (proof-of-origin tokens since 2024–25). Gate: slice 02. Plan B options recorded there: watch-page-only, server-side fetch (worse), metadata/chapters only, or stop.
-2. **First-search latency.** A verdict that arrives after the click is no verdict. Target p50 < 4 s, p95 < 8 s for the top 5.
+1. **Caption access from the search page.** No official API for other people's captions. Fetching for results the player hasn't loaded means extra requests from the user's logged-in session; YouTube has been tightening this (proof-of-origin tokens since 2024–25). Gate: slice 02. **Passed 2026-10-01 (Go)**: the ANDROID player client works (30/30 videos, logged in and out; ADR 0004). Residual risks: the client is unofficial and can be retired; bulk fetching from one IP triggers a timedtext block that also breaks the user's own YouTube captions. Plan B if it breaks: IOS client, `get_transcript` inside a real page, watch-page-only, or metadata/chapters only.
+2. **First-search latency.** A verdict that arrives after the click is no verdict. Target p50 < 4 s, p95 < 8 s for the top 5. Slice 02 measured caption fetch alone (hotspot): short videos 0.9 s; 4 h courses 4.6 s; a 24 h search 30.8 s (long auto captions as json3). Slice 05 must fix the long-video case.
 3. **Is "Great" well-defined?** If humans don't agree on Great vs Partial, a high-precision target is meaningless. Measure inter-rater agreement in the benchmark.
 4. **Behaviour change.** Users may find badges interesting and still click the top result.
 5. **Platform competition.** Google Search already shows "key moments" / suggested clips that match queries to video segments; YouTube is adding its own AI features. Learners may also skip video and ask an LLM.

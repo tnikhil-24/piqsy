@@ -28,3 +28,10 @@ The first real verdict. The owner pastes their Jev key into the options page (wi
 
 - 02
 - 03
+
+## Comments
+
+**2026-10-01, from slice 02** (`docs/captions-spike.md`):
+- YouTube re-renders search results right after each search, so chips are dropped and re-added. Cache verdicts per (query, video) and de-duplicate in-flight evaluations, or Jev is called twice per search.
+- Score each video as soon as its own captions arrive; don't wait for all 5.
+- The caption cache is in-memory per tab (`captionCache` in `extension/captions.js`). Once the background worker exists, consider moving it to `chrome.storage.session` (10 MB quota; a 31 h course is about 47k lines).

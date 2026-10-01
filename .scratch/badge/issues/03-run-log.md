@@ -23,3 +23,7 @@ Every evaluation is appended to a persistent local log (in extension storage), a
 ## Blocked by
 
 - 02
+
+## Comments
+
+**2026-10-01, from slice 02:** the content script already has each caption result (`getCaptions` in `extension/captions.js`: outcome, `detail`, kind, lang, line count, video duration, and whether it was `cached`). Log `detail` and `cached` too; they're what showed the 429 block and the re-render duplicates in the spike.

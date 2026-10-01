@@ -14,10 +14,26 @@ const STATES = {
   error: ['!', 'Piqsy error'],
 };
 
-function setState(chip, state) {
-  const [icon, word] = STATES[state];
+// `text` overrides the state's label (slice 02 shows a caption line count).
+function setState(chip, state, text) {
+  if (!text) {
+    const [icon, word] = STATES[state];
+    text = icon ? `${icon} ${word}` : word;
+  }
   chip.dataset.state = state;
-  chip.textContent = icon ? `${icon} ${word}` : word;
+  chip.textContent = text;
+}
+
+async function check(chip) {
+  const t0 = performance.now();
+  const { videoId } = chip.dataset;
+  const { result, cached } = await getCaptions(videoId);
+  const ms = Math.round(performance.now() - t0);
+  const what = result.lines ? `${result.kind} ${result.lang}, ${result.lines.length} lines, ${result.durationSec}s video` : result.reason;
+  console.log(`[piqsy] captions ${videoId}: ${what}${result.detail ? ` (${result.detail})` : ''} in ${ms}ms${cached ? ' [cached]' : ''}`);
+  if (!chip.isConnected) return;
+  if (result.lines) setState(chip, 'captions', `captions ✓ (${result.lines.length} lines)`);
+  else setState(chip, result.reason === 'fetch failed' ? 'error' : 'no-captions');
 }
 
 function makeChip(videoId, query) {
@@ -60,8 +76,16 @@ function sync() {
     const thumb = chip.parentElement;
     if (wanted.get(thumb) !== chip.dataset.videoId || chip.dataset.query !== query) chip.remove();
   }
+  const t0 = performance.now();
+  const checks = [];
   for (const [thumb, videoId] of wanted) {
-    if (!thumb.querySelector(':scope > .piqsy-chip')) thumb.append(makeChip(videoId, query));
+    if (thumb.querySelector(':scope > .piqsy-chip')) continue;
+    const chip = makeChip(videoId, query);
+    thumb.append(chip);
+    checks.push(check(chip));
+  }
+  if (checks.length) {
+    Promise.all(checks).then(() => console.log(`[piqsy] ${checks.length} videos checked in parallel in ${Math.round(performance.now() - t0)}ms`));
   }
 }
 
