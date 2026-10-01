@@ -31,6 +31,7 @@ Single-context: one root `CONTEXT.md` plus `docs/adr/`. See `docs/agents/domain.
 - Tests: `node --test` from the repo root (Node's built-in runner; don't pass a directory, as Node 22 treats it as a file).
 - Load: `chrome://extensions` → Developer mode → Load unpacked → `extension/`. After a code change, click ↻ on Piqsy **and** reload the YouTube tab; reloading only one leaves the old code running.
 - Inspect: on a YouTube search page, open DevTools → Console and filter by `[piqsy]`. Ask the owner to paste only those lines; full console dumps are huge and get truncated.
+- Run log: Piqsy → Details → Extension options → "Export log as JSON" (storage key `runLog`, last 2000 evaluations). Use it to check failures (`detail`, e.g. timedtext 429) and latency over real searches.
 - Demo mode (all chip states): `localStorage.piqsyDemo = 1` in the console, then reload.
 - Logged out: Incognito needs "Allow in Incognito" in Piqsy's details.
 - Page adapters, views and caption fetching are checked manually in Chrome by the owner (PRD testing decisions).
