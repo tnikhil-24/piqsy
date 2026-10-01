@@ -78,3 +78,24 @@ test('refine keeps the wide window when no fine window reaches the range thresho
     { start: 110, end: 240, peak: 0.9, strongest: true },
   ]);
 });
+
+test('broad: Great when relevant windows cover BROAD_GREAT_SHARE of the video, no ranges', () => {
+  const { BROAD_GREAT_SHARE } = require('./verdict.js');
+  assert.equal(BROAD_GREAT_SHARE, 0.4);
+  // 2 of 5 equal windows relevant = 40%, though none reaches GREAT_PEAK
+  const r = judge(w(0.75, 0.1, 0.72, 0.2, 0.1), 'broad');
+  assert.deepEqual([r.verdict, r.throughout, r.ranges], ['great', true, []]);
+  // same scores, narrow: no strong window, so only Partial
+  assert.equal(judge(w(0.75, 0.1, 0.72, 0.2, 0.1)).verdict, 'partial');
+});
+
+test('broad: Partial below the coverage share, with ranges; Not covered and Unsure as narrow', () => {
+  // 1 of 3 windows relevant = 33%; a narrow Great pattern is only Partial when broad
+  const r = judge(w(0.95, 0.1, 0.1), 'broad');
+  assert.equal(r.verdict, 'partial');
+  assert.equal(r.ranges.length, 1);
+  assert.equal(judge(w(0.9, 0.85, 0.1, 0.1, 0.1, 0.1), 'broad').verdict, 'partial');
+  assert.equal(judge(w(0.29, 0.1), 'broad').verdict, 'not-covered');
+  assert.equal(judge(w(0.59, 0.1), 'broad').verdict, 'unsure');
+  assert.equal(judge([], 'broad').verdict, 'unsure');
+});

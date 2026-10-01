@@ -109,3 +109,9 @@ test('checkQuery: one request, two noul questions, format words as a hint, thres
   assert.equal(r.broad, false); // near the threshold -> narrow
   assert.doesNotMatch(JSON.parse(calls[1].init.body).questions.broad.instructions, /Format words/);
 });
+
+test('broad queries get the "teaches part of" window question', async () => {
+  const { f, calls } = fakeFetch(answer(0.9));
+  await scoreWindows('k', 'dsa full course', ['t'], { fetch: f, broad: true });
+  assert.equal(JSON.parse(calls[0].init.body).questions.explains.instructions, 'This transcript excerpt teaches part of "dsa".');
+});

@@ -9,12 +9,17 @@ const RANGE_MIN = 0.7; // windows at or above this form ranges
 const MAX_RANGES = 3;
 const RANGE_LEAD_SEC = 10; // start ranges early: landing early is fine, late is not
 const THROUGHOUT_SHARE = 0.4; // relevant (>= RANGE_MIN) windows covering this much of the video: no ranges
+const BROAD_GREAT_SHARE = 0.4; // broad queries (ADR 0005): Great when relevant windows cover this much
 
-function verdictOf(scores) {
-  if (!scores.length) return 'unsure';
-  // A one-window video (about 3 min or less) has no neighbour, so its own score decides.
+// Narrow: a strong window next to a supporting one. A one-window video (about
+// 3 min or less) has no neighbour, so its own score decides.
+function narrowGreat(scores) {
   const supported = (i) => scores.length === 1 || scores[i - 1] >= GREAT_SUPPORT || scores[i + 1] >= GREAT_SUPPORT;
-  const great = scores.some((s, i) => s >= GREAT_PEAK && supported(i));
+  return scores.some((s, i) => s >= GREAT_PEAK && supported(i));
+}
+
+function verdictOf(scores, great) {
+  if (!scores.length) return 'unsure';
   if (great) return 'great';
   const peak = Math.max(...scores);
   if (peak >= PARTIAL_PEAK) return 'partial';
@@ -37,12 +42,16 @@ function rangesOf(windows) {
     .sort((a, b) => a.start - b.start);
 }
 
-// Windows tile the video, so their spans give its duration.
-function judge(windows) {
+// kind: 'narrow' (one concept) or 'broad' (a whole subject: Great is judged by
+// coverage alone). Windows tile the video, so their spans give its duration.
+function judge(windows, kind = 'narrow') {
   const span = (ws) => ws.reduce((sum, w) => sum + w.end - w.start, 0);
-  const throughout = windows.length > 0 && span(windows.filter((w) => w.score >= RANGE_MIN)) >= THROUGHOUT_SHARE * span(windows);
+  const share = (min) => windows.length > 0 && span(windows.filter((w) => w.score >= RANGE_MIN)) >= min * span(windows);
+  const broad = kind === 'broad';
+  const throughout = share(broad ? BROAD_GREAT_SHARE : THROUGHOUT_SHARE);
+  const scores = windows.map((w) => w.score);
   const bestWindow = windows.reduce((best, w) => (!best || w.score > best.score ? w : best), null);
-  return { verdict: verdictOf(windows.map((w) => w.score)), ranges: throughout ? [] : rangesOf(windows), throughout, bestWindow };
+  return { verdict: verdictOf(scores, broad ? throughout : narrowGreat(scores)), ranges: throughout ? [] : rangesOf(windows), throughout, bestWindow };
 }
 
 // Second pass: ranges with the wide best window swapped for its scored 2-minute
@@ -55,4 +64,4 @@ function refine(windows, best, fine) {
   return rangesOf(windows.flatMap((w) => (w === best ? inner : [w])));
 }
 
-if (typeof module === 'object') module.exports = { judge, refine, THROUGHOUT_SHARE, GREAT_PEAK, GREAT_SUPPORT, PARTIAL_PEAK, NOT_COVERED_MAX, RANGE_MIN, MAX_RANGES, RANGE_LEAD_SEC };
+if (typeof module === 'object') module.exports = { judge, refine, THROUGHOUT_SHARE, BROAD_GREAT_SHARE, GREAT_PEAK, GREAT_SUPPORT, PARTIAL_PEAK, NOT_COVERED_MAX, RANGE_MIN, MAX_RANGES, RANGE_LEAD_SEC };

@@ -24,9 +24,9 @@ const ms = (t0) => Math.round(performance.now() - t0);
 const rounded = (scores) => scores.map((s) => Math.round(s * 1000) / 1000);
 
 // Jev scores for windows, via the background worker: { scores } or { error }.
-async function score(query, windows) {
+async function score(query, broad, windows) {
   try {
-    return await chrome.runtime.sendMessage({ type: 'score', query, texts: windows.map((w) => w.text) });
+    return await chrome.runtime.sendMessage({ type: 'score', query, broad, texts: windows.map((w) => w.text) });
   } catch (e) {
     return { error: String(e) }; // e.g. extension reloaded under an open tab
   }
@@ -98,7 +98,7 @@ async function evaluate(query, videoId) {
     cookieMode: cookieMode(),
     learningP: qc.learningP,
     broadP: qc.broadP,
-    broad: qc.broad,
+    kind: qc.broad ? 'broad' : 'narrow',
     topic: qc.topic,
     queryError: qc.error ?? null,
     verdict: null,
@@ -116,18 +116,18 @@ async function evaluate(query, videoId) {
   if (result.lines) {
     const windows = makeWindows(result.lines, result.durationSec);
     const t1 = performance.now();
-    const res = await score(query, windows);
+    const res = await score(query, qc.broad, windows);
     Object.assign(entry, { windows: windows.length, jevMs: ms(t1) });
     if (res.error) {
       Object.assign(entry, { verdict: 'error', jevError: res.error });
     } else {
       const scored = windows.map((w, i) => ({ ...w, score: res.scores[i] }));
-      const { verdict, ranges, throughout, bestWindow } = judge(scored);
+      const { verdict, ranges, throughout, bestWindow } = judge(scored, entry.kind);
       Object.assign(entry, { verdict, ranges, throughout, scores: rounded(res.scores) });
       // Second pass (long videos): 2-minute windows inside a wide best window.
       const fine = verdict === 'great' || verdict === 'partial' ? fineWindows(result.lines, bestWindow) : [];
       if (!throughout && fine.length > 1) {
-        const res2 = await score(query, fine);
+        const res2 = await score(query, qc.broad, fine);
         Object.assign(entry, { fineWindows: fine.length, jevMs: ms(t1) });
         // ponytail: a failed second pass keeps the first-pass ranges; the error is logged.
         if (res2.error) entry.jevError = res2.error;
@@ -137,7 +137,7 @@ async function evaluate(query, videoId) {
   }
   entry.totalMs = ms(t0);
   if (entry.verdict) {
-    console.log(`[piqsy] verdict ${videoId}: ${entry.verdict}${entry.jevError ? ` (${entry.jevError})` : ''}, ${entry.windows} windows${entry.fineWindows ? ` + ${entry.fineWindows} fine` : ''}${entry.throughout ? ', throughout' : ''}, Jev ${entry.jevMs}ms, total ${entry.totalMs}ms`);
+    console.log(`[piqsy] verdict ${videoId} (${entry.kind}): ${entry.verdict}${entry.jevError ? ` (${entry.jevError})` : ''}, ${entry.windows} windows${entry.fineWindows ? ` + ${entry.fineWindows} fine` : ''}${entry.throughout ? ', throughout' : ''}, Jev ${entry.jevMs}ms, total ${entry.totalMs}ms`);
   }
   await appendLog(entry);
   return entry.verdict || entry.outcome;

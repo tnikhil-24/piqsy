@@ -97,10 +97,13 @@ async function checkQuery(key, query, opts) {
   return { learningP, broadP, learning: learningP >= LEARNING_MIN, broad: broadP >= BROAD_MIN, topic, formatWords };
 }
 
-// Window texts -> probability each explains the query's topic. One noul request
-// per non-empty window; empty windows score 0 without a request.
-function scoreWindows(key, query, texts, { limit = makeLimiter(JEV_CONCURRENCY), ...opts } = {}) {
-  const questions = { explains: { type: 'noul', instructions: `This transcript excerpt explains "${topicOf(query).topic}".` } };
+// Window texts -> probability each explains the query's topic (narrow) or
+// teaches part of it (broad). One noul request per non-empty window; empty
+// windows score 0 without a request.
+function scoreWindows(key, query, texts, { broad = false, limit = makeLimiter(JEV_CONCURRENCY), ...opts } = {}) {
+  const { topic } = topicOf(query);
+  const instructions = broad ? `This transcript excerpt teaches part of "${topic}".` : `This transcript excerpt explains "${topic}".`;
+  const questions = { explains: { type: 'noul', instructions } };
   return Promise.all(texts.map((text) => (text ? limit(async () => (await askJev(key, text, questions, opts)).explains.noul) : 0)));
 }
 

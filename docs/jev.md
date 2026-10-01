@@ -62,7 +62,7 @@ Rough cost: ~12k tokens per hour of speech → 1-hr video ≈ $0.0005, 24-hr vid
 
 ## Query check (slice 06)
 
-`checkQuery`: one request per search, state `YouTube search: "<query>"`, two `noul` questions: `learning` ("This YouTube search is to learn a concept or skill (not music, entertainment, news or shopping).") and `broad` ("This YouTube search asks for a whole subject, not one specific concept." plus the format words found, as a hint). Thresholds `LEARNING_MIN` 0.5, `BROAD_MIN` 0.65. Window questions use the topic (query minus format words, `topicOf`), not the raw query (ADR 0005).
+`checkQuery`: one request per search, state `YouTube search: "<query>"`, two `noul` questions: `learning` ("This YouTube search is to learn a concept or skill (not music, entertainment, news or shopping).") and `broad` ("This YouTube search asks for a whole subject, not one specific concept." plus the format words found, as a hint). Thresholds `LEARNING_MIN` 0.5, `BROAD_MIN` 0.65. Window questions use the topic (query minus format words, `topicOf`), not the raw query (ADR 0005). Broad queries (slice 12) ask `This transcript excerpt teaches part of "<topic>"` instead of `explains`.
 
 ## Unknowns to check by measurement
 

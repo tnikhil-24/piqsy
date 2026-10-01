@@ -1,6 +1,6 @@
 # 12 — Broad-query verdicts
 
-Status: ready-for-agent
+Status: ready-for-human
 Type: AFK
 Blocked by: 06
 
@@ -22,3 +22,11 @@ When the query check (issue 06) says a query is broad, score windows with `This 
 ## Blocked by
 
 - 06
+
+## Comments
+
+**2026-10-01, built (awaiting the owner's check).**
+
+- `verdict.js`: `judge(windows, kind)`; broad Great = relevant windows (≥ `RANGE_MIN`) cover ≥ `BROAD_GREAT_SHARE` (0.4) of the video, shown as throughout; otherwise the narrow Partial / Not covered / Unsure rules. A narrow-style Great pattern (0.9 next to 0.85) with low coverage is only Partial for broad.
+- `jev.js`: `scoreWindows(..., { broad })` asks `This transcript excerpt teaches part of "<topic>"`; the slice 05 second pass uses the same question.
+- Run log: `kind` (`broad`/`narrow`) replaces 06's `broad` boolean. Console verdict line shows the kind.

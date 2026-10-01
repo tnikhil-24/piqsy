@@ -18,7 +18,7 @@ async function handle(msg) {
     await askJev(msg.key, 'Piqsy key check.', { ok: { type: 'noul', instructions: 'This is a test.' } });
     return {};
   }
-  if (msg.type === 'score') return { scores: await scoreWindows(await jevKey(), msg.query, msg.texts, { limit }) };
+  if (msg.type === 'score') return { scores: await scoreWindows(await jevKey(), msg.query, msg.texts, { broad: msg.broad, limit }) };
   if (msg.type === 'checkQuery') return checkQuery(await jevKey(), msg.query);
   throw new Error(`unknown message ${msg.type}`);
 }
