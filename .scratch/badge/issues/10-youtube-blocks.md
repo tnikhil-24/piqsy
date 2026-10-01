@@ -1,6 +1,6 @@
 # 10 — Survive YouTube blocks
 
-Status: ready-for-human
+Status: done
 Type: AFK (parts 2 and 3) + HITL (part 1 probe)
 Blocked by: 04
 
@@ -33,7 +33,7 @@ Ruled out: rotating IPs/proxies to dodge the check (evades YouTube's abuse detec
 - [x] After the first 429 or bot check, no caption requests go out for the pause period; chips show `Piqsy error`; the run log records the block.
 - [x] Captions survive a tab reload and an extension reload; a repeat search after a reload sends no caption requests.
 - [x] Storage stays bounded (oldest videos dropped past a limit).
-- [ ] Option 1 probed and the result recorded in `docs/captions-spike.md`.
+- [x] Option 1 probed and the result recorded in `docs/captions-spike.md`.
 
 ## Comments
 
@@ -67,3 +67,9 @@ Ruled out: rotating IPs/proxies to dodge the check (evades YouTube's abuse detec
 **2026-10-01, from slice 05 owner check (run log 19:36 UTC):** the 10 s stall is in the **timedtext** request, not the player: `RpLnQnurpLY` (1.2 h, 1,912 lines) player 294 ms, text 10,328 ms. Size doesn't explain it (a 4 h video's 6,018 lines took 0.8 s). Again the slowest of 5 parallel fetches. Next idea: a timeout plus one retry on timedtext after ~3 s, and check whether it's always the 5th concurrent request. The "search, reload, search again → `[cached]`" owner check is still to do.
 
 **2026-10-01, during the slice 07 check.** Another block (timedtext 429, 1103 bytes) on one `data structures and algorithms full course` search: 2 videos from saved captions, 3 long ones fetched and all got 429. Earlier that day the same machine fetched the 4–12.5 h courses for the slice 12 check. The 30 min pause triggered as designed. Network: home (the hotspot was also blocked earlier the same day).
+
+**2026-10-01, option 1 during a real block (home Wi-Fi, 21:31 UTC), mode 1.** `data structures and algorithms full course`: 2 videos from saved captions (Great); the 3 uncached ones got player OK (150–180 ms) and then **timedtext HTTP 429**, exactly as in mode 0 three minutes earlier. **Cookies don't avoid the timedtext block.** Mode 1 stays an off-by-default switch (it works, but buys nothing); mode 0 is the default. Recorded in `docs/captions-spike.md` ("What breaks" 7).
+
+Closing: all criteria met. What's left against blocks is fetching less (saved captions, done; smaller caption formats, issue 11) and option 5 (`get_transcript` in a real page), which needs research first; see `docs/assessment.md` risk 1.
+
+Side note: parallel fetches already in flight when the first 429 arrives all fail too (3 × 429 per search); the pause only stops new requests. Harmless (they were sent before the block was known).
