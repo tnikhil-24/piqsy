@@ -19,6 +19,7 @@ Single-context: one root `CONTEXT.md` plus `docs/adr/`. See `docs/agents/domain.
 - `docs/adr/`: why the big decisions were made (Jev window scoring, no backend, verified verdicts only, captions via the ANDROID client).
 - `docs/captions-spike.md`: how captions are fetched, measured latency, and what breaks (IP block, long auto captions). Read before touching `extension/captions.js`.
 - `docs/assessment.md`: open risks and concerns not yet resolved.
+- `docs/future-plans.md`: ideas deliberately postponed, and what brings each back.
 - `CONTEXT.md`: glossary; use its terms.
 
 ## Code and status
