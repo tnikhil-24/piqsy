@@ -69,15 +69,15 @@ function getQueryCheck(query) {
 
 // One evaluation of (query, video): captions -> windows -> Jev (via the
 // background worker) -> verdict. The query check runs while captions download;
-// scoring waits for it. Logs one run-log entry; returns the chip state
-// ('hidden' for a non-learning query: no entry, no chip).
+// scoring waits for it. Logs one run-log entry; returns { state, hover }
+// with its hover text ('hidden' for a non-learning query: no entry, no chip).
 async function evaluate(query, videoId) {
   const t0 = performance.now();
   const queryCheck = getQueryCheck(query).promise;
   const { result, cached } = await getCaptions(videoId);
   const captionMs = ms(t0);
   const qc = await queryCheck;
-  if (!qc.learning) return 'hidden';
+  if (!qc.learning) return { state: 'hidden' };
   const what = result.lines ? `${result.kind} ${result.lang}, ${result.lines.length} lines, ${result.durationSec}s video` : result.reason;
   console.log(`[piqsy] captions ${videoId}: ${what}${result.detail ? ` (${result.detail})` : ''} in ${captionMs}ms${cached ? ' [cached]' : ` (player ${result.playerMs ?? '-'}ms, text ${result.textMs ?? '-'}ms)`} [cookies ${cookieMode()}]`);
   const entry = {
@@ -113,6 +113,7 @@ async function evaluate(query, videoId) {
     jevError: null,
   };
 
+  let best = null; // evidence for the hover card
   if (result.lines) {
     const windows = makeWindows(result.lines, result.durationSec);
     const t1 = performance.now();
@@ -124,6 +125,7 @@ async function evaluate(query, videoId) {
       const scored = windows.map((w, i) => ({ ...w, score: res.scores[i] }));
       const { verdict, ranges, throughout, bestWindow } = judge(scored, entry.kind);
       Object.assign(entry, { verdict, ranges, throughout, scores: rounded(res.scores) });
+      best = bestWindow;
       // Second pass (long videos): 2-minute windows inside a wide best window.
       const fine = verdict === 'great' || verdict === 'partial' ? fineWindows(result.lines, bestWindow) : [];
       if (!throughout && fine.length > 1) {
@@ -131,7 +133,11 @@ async function evaluate(query, videoId) {
         Object.assign(entry, { fineWindows: fine.length, jevMs: ms(t1) });
         // ponytail: a failed second pass keeps the first-pass ranges; the error is logged.
         if (res2.error) entry.jevError = res2.error;
-        else Object.assign(entry, { ranges: refine(scored, bestWindow, fine.map((w, i) => ({ ...w, score: res2.scores[i] }))), fineScores: rounded(res2.scores) });
+        else {
+          const fineScored = fine.map((w, i) => ({ ...w, score: res2.scores[i] }));
+          Object.assign(entry, { ranges: refine(scored, bestWindow, fineScored), fineScores: rounded(res2.scores) });
+          best = fineScored.reduce((a, b) => (b.score > a.score ? b : a)); // a 2-minute window reads better than ~25 min
+        }
       }
     }
   }
@@ -140,13 +146,14 @@ async function evaluate(query, videoId) {
     console.log(`[piqsy] verdict ${videoId} (${entry.kind}): ${entry.verdict}${entry.jevError ? ` (${entry.jevError})` : ''}, ${entry.windows} windows${entry.fineWindows ? ` + ${entry.fineWindows} fine` : ''}${entry.throughout ? ', throughout' : ''}, Jev ${entry.jevMs}ms, total ${entry.totalMs}ms`);
   }
   await appendLog(entry);
-  return entry.verdict || entry.outcome;
+  const state = entry.verdict || entry.outcome;
+  return { state, hover: hoverText({ state, best, kind: entry.kind, reason: entry.reason, why: entry.jevError || entry.detail }) };
 }
 
 // YouTube re-renders results right after a search, dropping and re-adding
 // chips; this de-duplicates so each (query, video) is evaluated once per tab.
 // ponytail: in-memory per tab, like captionCache.
-const evaluations = new Map(); // `${query}\n${videoId}` -> Promise<state>
+const evaluations = new Map(); // `${query}\n${videoId}` -> Promise<{ state, hover }>
 
 function getEvaluation(query, videoId) {
   const key = `${query}\n${videoId}`;
@@ -154,10 +161,10 @@ function getEvaluation(query, videoId) {
     evaluations.set(
       key,
       evaluate(query, videoId)
-        .catch((e) => (console.warn('[piqsy]', e), 'error'))
-        .then((state) => {
-          if (state === 'error') evaluations.delete(key); // retry next time
-          return state;
+        .catch((e) => (console.warn('[piqsy]', e), { state: 'error', hover: hoverText({ state: 'error', why: String(e) }) }))
+        .then((r) => {
+          if (r.state === 'error') evaluations.delete(key); // retry next time
+          return r;
         }),
     );
   }
@@ -165,8 +172,10 @@ function getEvaluation(query, videoId) {
 }
 
 async function check(chip) {
-  const state = await getEvaluation(chip.dataset.query, chip.dataset.videoId);
-  if (chip.isConnected) setState(chip, state);
+  const { state, hover } = await getEvaluation(chip.dataset.query, chip.dataset.videoId);
+  if (!chip.isConnected) return;
+  setState(chip, state);
+  chip.title = hover; // ponytail: native tooltip (OS-styled, legible on both themes); a custom card if it proves too plain
 }
 
 function makeChip(videoId, query) {

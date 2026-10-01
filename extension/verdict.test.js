@@ -99,3 +99,20 @@ test('broad: Partial below the coverage share, with ranges; Not covered and Unsu
   assert.equal(judge(w(0.59, 0.1), 'broad').verdict, 'unsure');
   assert.equal(judge([], 'broad').verdict, 'unsure');
 });
+
+test('hoverText: best window snippet, trimmed at a word, with the kind', () => {
+  const { hoverText, SNIPPET_MAX } = require('./verdict.js');
+  assert.equal(hoverText({ state: 'great', best: { start: 258, end: 3780, text: 'a  b\nc' }, kind: 'narrow' }), 'Best part 4:18–1:03:00: "a b c"\nJudged as: one topic');
+  const long = hoverText({ state: 'partial', best: { start: 0, end: 120, text: 'word '.repeat(200) }, kind: 'broad' });
+  assert.match(long, /^Best part 0:00–2:00: "word( word)* …"\nJudged as: whole subject$/);
+  assert.ok(long.length < SNIPPET_MAX + 80);
+  assert.equal(hoverText({ state: 'unsure', best: { start: 0, end: 1, text: '' } }), '');
+});
+
+test('hoverText: plain explanations for not covered, no captions, error', () => {
+  const { hoverText } = require('./verdict.js');
+  assert.match(hoverText({ state: 'not-covered', kind: 'broad' }), /^No part .*\nJudged as: whole subject$/);
+  assert.match(hoverText({ state: 'no-captions', reason: 'none' }), /no captions/);
+  assert.match(hoverText({ state: 'no-captions', reason: 'not English' }), /No English captions/);
+  assert.equal(hoverText({ state: 'error', why: 'Jev HTTP 401' }), "Piqsy couldn't check this video: Jev HTTP 401");
+});

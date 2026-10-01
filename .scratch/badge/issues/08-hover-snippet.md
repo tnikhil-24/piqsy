@@ -1,6 +1,6 @@
 # 08 — Hover snippet on the chip
 
-Status: ready-for-agent
+Status: ready-for-human
 Type: AFK
 Blocked by: 04
 
@@ -27,3 +27,9 @@ Hovering a verdict chip on the search page shows the caption text of the best-sc
 ## Comments
 
 **2026-10-01, from slice 05:** `judge` already returns `bestWindow` (`{ start, end, text, score }` when the scored windows carry text), so the snippet is its `text`. On long videos the window is up to ~25 min of captions; trim it, or use the best 2-minute window from the second pass when it ran.
+
+**2026-10-01, built (awaiting the owner's check).** The hover card is the chip's native `title` tooltip: drawn by Chrome, so legible on both YouTube themes, and it can't block clicks or YouTube's hover preview. Text comes from `hoverText` in `verdict.js` (pure, tested):
+
+- Great / Partial / Unsure: `Best part 4:18–6:18: "<caption text>"`, trimmed at a word to 280 characters (`SNIPPET_MAX`), then `Judged as: one topic` / `whole subject`. The best window is the second pass's best 2-minute window when it ran, else the first pass's best window (up to ~25 min; its first 280 characters may be intro to the relevant part).
+- Not covered: plain sentence plus the kind. No captions: "This video has no captions" / "No English captions". Error: "Piqsy couldn't check this video: <detail>".
+- Skipped: a styled card. Add it if the native tooltip proves too plain (it appears after ~1 s and can't be styled).

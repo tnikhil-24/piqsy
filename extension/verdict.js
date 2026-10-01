@@ -64,4 +64,27 @@ function refine(windows, best, fine) {
   return rangesOf(windows.flatMap((w) => (w === best ? inner : [w])));
 }
 
-if (typeof module === 'object') module.exports = { judge, refine, THROUGHOUT_SHARE, BROAD_GREAT_SHARE, GREAT_PEAK, GREAT_SUPPORT, PARTIAL_PEAK, NOT_COVERED_MAX, RANGE_MIN, MAX_RANGES, RANGE_LEAD_SEC };
+const SNIPPET_MAX = 280; // characters of caption text in the hover card
+
+const clock = (sec) => {
+  const s = Math.floor(sec);
+  const hms = [Math.floor(s / 3600), Math.floor(s / 60) % 60, s % 60];
+  return (hms[0] ? `${hms[0]}:${String(hms[1]).padStart(2, '0')}` : `${hms[1]}`) + `:${String(hms[2]).padStart(2, '0')}`;
+};
+
+// Hover card text for a chip. state: chip state; best: the best window
+// ({ start, end, text }) for Great / Partial / Unsure; kind: 'broad' | 'narrow';
+// reason: why there are no captions; why: error detail. Pure.
+function hoverText({ state, best, kind, reason, why }) {
+  const judged = kind ? `
+Judged as: ${kind === 'broad' ? 'whole subject' : 'one topic'}` : '';
+  if (state === 'not-covered') return `No part of this video's captions covers your search.${judged}`;
+  if (state === 'no-captions') return `${reason === 'not English' ? 'No English captions' : 'This video has no captions'}, so Piqsy can't check it.`;
+  if (state === 'error') return `Piqsy couldn't check this video${why ? `: ${why}` : '.'}`;
+  if (!best?.text) return '';
+  const t = best.text.replace(/\s+/g, ' ').trim();
+  const cut = t.length <= SNIPPET_MAX ? t : `${t.slice(0, t.lastIndexOf(' ', SNIPPET_MAX) + 1 || SNIPPET_MAX).trim()} …`;
+  return `Best part ${clock(best.start)}–${clock(best.end)}: "${cut}"${judged}`;
+}
+
+if (typeof module === 'object') module.exports = { judge, refine, hoverText, SNIPPET_MAX, THROUGHOUT_SHARE, BROAD_GREAT_SHARE, GREAT_PEAK, GREAT_SUPPORT, PARTIAL_PEAK, NOT_COVERED_MAX, RANGE_MIN, MAX_RANGES, RANGE_LEAD_SEC };
