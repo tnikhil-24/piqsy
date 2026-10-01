@@ -46,3 +46,9 @@ The same Jev request also asks whether the query is broad (a whole subject) or n
 - Broad queries are still judged by narrow rules; issue 12 adds broad verdicts.
 
 Owner check (two searches, short videos fine): `lofi music` → no chips, console `[piqsy] query "lofi music": learning <0.5 … -> no chips`; `kafka consumer group rebalancing` → chips. Then the popup switch off → chips vanish; on → they return. Record the probabilities here.
+
+**2026-10-01, owner check.**
+
+- `lofi music`: learning 0.04, broad 0.76 → no chips. ✓
+- `kafka consumer group rebalancing`: learning 0.97, broad 0.48 → narrow, chips; all 5 Great (throughout), 1.0–1.3 s per video with saved captions. ✓
+- Still to check: popup switch off/on.
