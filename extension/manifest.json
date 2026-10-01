@@ -1,0 +1,14 @@
+{
+  "manifest_version": 3,
+  "name": "Piqsy",
+  "version": "0.1.0",
+  "description": "Rates how well the top YouTube search results actually cover your query.",
+  "content_scripts": [
+    {
+      "matches": ["https://www.youtube.com/*"],
+      "js": ["content.js"],
+      "css": ["chip.css"],
+      "run_at": "document_idle"
+    }
+  ]
+}

@@ -1,0 +1,62 @@
+/* The chip sits on the thumbnail image, not the page background, so one dark
+   translucent backing keeps it legible on YouTube's light and dark themes. */
+ytd-thumbnail {
+  position: relative;
+}
+
+.piqsy-chip {
+  position: absolute;
+  top: 6px;
+  left: 6px;
+  z-index: 10;
+  padding: 1px 6px;
+  border: 1px solid transparent;
+  border-radius: 4px;
+  background: rgba(0, 0, 0, 0.6);
+  color: #fff;
+  font: 500 12px/18px Roboto, Arial, sans-serif;
+  white-space: nowrap;
+}
+
+.piqsy-chip[data-state='pending'] {
+  color: rgba(255, 255, 255, 0.8);
+  animation: piqsy-pulse 1.4s ease-in-out infinite;
+}
+
+/* The only loud state. */
+.piqsy-chip[data-state='great'] {
+  background: #188038;
+  font-weight: 700;
+}
+
+.piqsy-chip[data-state='partial'] {
+  border-color: #f9ab00;
+  color: #fdd663;
+}
+
+.piqsy-chip[data-state='not-covered'] {
+  color: #bdbdbd;
+}
+
+.piqsy-chip[data-state='unsure'] {
+  border-color: rgba(255, 255, 255, 0.6);
+}
+
+.piqsy-chip[data-state='no-captions'],
+.piqsy-chip[data-state='error'] {
+  color: rgba(255, 255, 255, 0.65);
+  font-weight: 400;
+}
+
+@keyframes piqsy-pulse {
+  50% {
+    opacity: 0.35;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .piqsy-chip[data-state='pending'] {
+    animation: none;
+    opacity: 0.6;
+  }
+}
