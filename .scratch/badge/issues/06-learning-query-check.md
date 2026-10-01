@@ -1,4 +1,4 @@
-# 06 — Learning-query check and on/off switch
+# 06 — Learning-query check (and broad vs narrow) and on/off switch
 
 Status: ready-for-agent
 Type: AFK

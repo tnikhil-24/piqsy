@@ -23,3 +23,7 @@ Hovering a verdict chip on the search page shows the caption text of the best-sc
 ## Blocked by
 
 - 04
+
+## Comments
+
+**2026-10-01, from slice 05:** `judge` already returns `bestWindow` (`{ start, end, text, score }` when the scored windows carry text), so the snippet is its `text`. On long videos the window is up to ~25 min of captions; trim it, or use the best 2-minute window from the second pass when it ran.

@@ -24,3 +24,7 @@ When the owner clicks a result Piqsy rated Great or Partial, the watch page show
 ## Blocked by
 
 - 04
+
+## Comments
+
+**2026-10-01, from slices 05 and ADR 0005:** `judge` in `extension/verdict.js` already returns `ranges` (refined by the 2-minute second pass on long videos) and `throughout`; both are in the run log. This slice needs a per-video session store of `{ query, verdict, ranges, throughout }` and the strip. Broad-query Greats (issue 12) are always `throughout`, so they show "Relevant throughout", no ranges.
