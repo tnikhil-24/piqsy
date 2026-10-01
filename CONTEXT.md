@@ -21,4 +21,5 @@ Use these terms exactly. Avoid the listed synonyms.
 | **Chip** | The badge on a search result's thumbnail (top-left). | badge (OK informally), pill |
 | **Strip** | The bar under the player on the watch page that lists ranges. | banner |
 | **Block** | YouTube refusing Piqsy's caption requests from an IP: timedtext HTTP 429, or the player's "Sign in to confirm you're not a bot". Shows as `Piqsy error`; also breaks the user's own YouTube captions while it lasts. | ban, rate limit (only for the 429) |
+| **Pause** | After a block, Piqsy sends no caption requests for 30 min (all tabs). Chips show `Piqsy error` meanwhile. | cooldown, backoff |
 | **Jev** | TypeSafe AI's decision model; see `docs/jev.md`. | the LLM, the AI |

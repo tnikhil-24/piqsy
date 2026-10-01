@@ -22,7 +22,7 @@ It was the only route that worked, and it held up in the browser: 30/30 videos h
 
 ## Update 2026-10-01 (afternoon)
 
-The "revisit" trigger fired the same day: after about 60 videos on the hotspot, the **player** request itself returned `LOGIN_REQUIRED: Sign in to confirm you're not a bot` for every video. Cookie-less requests look like a scraper; the first fix to try is sending the user's own YouTube session. See `.scratch/badge/issues/10-youtube-blocks.md` and `docs/captions-spike.md` ("What breaks" 6).
+The "revisit" trigger fired the same day: after about 60 videos on the hotspot, the **player** request itself returned `LOGIN_REQUIRED: Sign in to confirm you're not a bot` for every video. Cookie-less requests look like a scraper; the first fix to try is sending the user's own YouTube session. See `.scratch/badge/issues/10-youtube-blocks.md` and `docs/captions-spike.md` ("What breaks" 6). The block lifted in under 25 min. Since then Piqsy pauses caption requests for 30 min after a block, and captions are saved per video across reloads (background worker), not just per tab. Cookies with ANDROID work but are untested during a block; web auth (SAPISIDHASH) gets HTTP 400.
 
 ## Revisit when
 

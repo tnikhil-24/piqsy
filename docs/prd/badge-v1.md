@@ -103,7 +103,7 @@ Verdicts come from the video's real captions, not its title: the captions are sp
 6. **Search page adapter.** Reads the query from the page, finds the first 5 regular video results, injects and updates chips, handles YouTube's in-app navigation and re-renders without duplicates.
 7. **Watch page adapter.** On a watch page, looks up the current video in the session store; if it has a result from a Piqsy-rated search with Great/Partial, renders the strip under the player; clicking a range seeks the player and keeps playing. Clears on navigation to another video.
 8. **Chip and strip views.** State → element. States: pending (faint, pulsing), Great (solid green, white text), Partial (amber outline), Not covered (muted grey), Unsure (neutral outline), no captions and error (faint text). Icon + word in every state; light and dark themes. Hover on chip shows the best window's caption snippet. No Piqsy logo mark in V1.
-9. **Session store and run log.** Per-browser-session store: captions per video; latest result per video (query, verdict, ranges, snippet). Persistent local run log with JSON export.
+9. **Session store and run log.** Per-browser-session store: captions per video; latest result per video (query, verdict, ranges, snippet). Persistent local run log with JSON export. *As built (issue 10): captions are saved per video across reloads in extension storage (newest 200, only videos with captions), not only for the browser session.*
 10. **Options page and popup.** Options: Jev key entry with a validity check, log export. Popup: on/off switch.
 
 ### Behaviour decisions
