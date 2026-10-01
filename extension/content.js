@@ -32,12 +32,52 @@ async function score(query, windows) {
   }
 }
 
+async function appendLog(entry) {
+  try {
+    await chrome.runtime.sendMessage({ type: 'log', entry });
+  } catch (e) {
+    console.warn('[piqsy] run log', e);
+  }
+}
+
+// Learning-query check, once per query per tab: { learning, broad, learningP,
+// broadP, topic, error }. A failed check falls back to chipping, narrow.
+// A non-learning query gets one run-log entry (videoId null) so the threshold can be tuned.
+async function checkQuery(query) {
+  let r;
+  try {
+    r = await chrome.runtime.sendMessage({ type: 'checkQuery', query });
+  } catch (e) {
+    r = { error: String(e) };
+  }
+  if (r.error) r = { learning: true, broad: false, learningP: null, broadP: null, topic: null, error: r.error };
+  console.log(`[piqsy] query "${query}": learning ${r.learningP}, broad ${r.broadP}, topic "${r.topic}"${r.error ? ` (check failed: ${r.error})` : ''} -> ${r.learning ? (r.broad ? 'broad' : 'narrow') : 'no chips'}`);
+  if (!r.learning) appendLog({ ts: new Date().toISOString(), query, videoId: null, outcome: 'not-learning', learningP: r.learningP, broadP: r.broadP });
+  return r;
+}
+
+const queryChecks = new Map(); // query -> { promise, result (null until settled) }
+
+function getQueryCheck(query) {
+  if (!queryChecks.has(query)) {
+    const qc = { result: null };
+    qc.promise = checkQuery(query).then((r) => ((qc.result = r), schedule(), r));
+    queryChecks.set(query, qc);
+  }
+  return queryChecks.get(query);
+}
+
 // One evaluation of (query, video): captions -> windows -> Jev (via the
-// background worker) -> verdict. Logs one run-log entry; returns the chip state.
+// background worker) -> verdict. The query check runs while captions download;
+// scoring waits for it. Logs one run-log entry; returns the chip state
+// ('hidden' for a non-learning query: no entry, no chip).
 async function evaluate(query, videoId) {
   const t0 = performance.now();
+  const queryCheck = getQueryCheck(query).promise;
   const { result, cached } = await getCaptions(videoId);
   const captionMs = ms(t0);
+  const qc = await queryCheck;
+  if (!qc.learning) return 'hidden';
   const what = result.lines ? `${result.kind} ${result.lang}, ${result.lines.length} lines, ${result.durationSec}s video` : result.reason;
   console.log(`[piqsy] captions ${videoId}: ${what}${result.detail ? ` (${result.detail})` : ''} in ${captionMs}ms${cached ? ' [cached]' : ` (player ${result.playerMs ?? '-'}ms, text ${result.textMs ?? '-'}ms)`} [cookies ${cookieMode()}]`);
   const entry = {
@@ -56,6 +96,11 @@ async function evaluate(query, videoId) {
     textMs: cached ? null : (result.textMs ?? null),
     cached,
     cookieMode: cookieMode(),
+    learningP: qc.learningP,
+    broadP: qc.broadP,
+    broad: qc.broad,
+    topic: qc.topic,
+    queryError: qc.error ?? null,
     verdict: null,
     windows: null,
     jevMs: null,
@@ -94,11 +139,7 @@ async function evaluate(query, videoId) {
   if (entry.verdict) {
     console.log(`[piqsy] verdict ${videoId}: ${entry.verdict}${entry.jevError ? ` (${entry.jevError})` : ''}, ${entry.windows} windows${entry.fineWindows ? ` + ${entry.fineWindows} fine` : ''}${entry.throughout ? ', throughout' : ''}, Jev ${entry.jevMs}ms, total ${entry.totalMs}ms`);
   }
-  try {
-    await chrome.runtime.sendMessage({ type: 'log', entry });
-  } catch (e) {
-    console.warn('[piqsy] run log', e);
-  }
+  await appendLog(entry);
   return entry.verdict || entry.outcome;
 }
 
@@ -183,20 +224,24 @@ function sync() {
   // After ↻ on the extension, this old copy can't reach the background worker;
   // stay idle (no wasted YouTube requests) until the tab is reloaded.
   if (!chrome.runtime?.id) return;
-  if (location.pathname !== '/results') return;
+  const off = !enabled || location.pathname !== '/results';
   const query = new URLSearchParams(location.search).get('search_query') || '';
-  const results = topResults();
+  const results = off ? [] : topResults();
   const wanted = new Map(results.map(({ videoId, thumb }) => [thumb, videoId]));
+  const hidden = queryChecks.get(query)?.result?.learning === false;
 
   for (const chip of document.querySelectorAll('.piqsy-chip')) {
     const thumb = chip.parentElement;
-    if (wanted.get(thumb) !== chip.dataset.videoId || chip.dataset.query !== query) chip.remove();
+    if (hidden || wanted.get(thumb) !== chip.dataset.videoId || chip.dataset.query !== query) chip.remove();
   }
-  if (isStale(query, results.map((r) => r.videoId).join())) return;
+  if (off || hidden || isStale(query, results.map((r) => r.videoId).join())) return;
+  const qc = getQueryCheck(query);
   const t0 = performance.now();
   const checks = [];
   for (const [thumb, videoId] of wanted) {
     if (thumb.querySelector(':scope > .piqsy-chip')) continue;
+    getEvaluation(query, videoId); // start captions now, in parallel with the query check
+    if (!qc.result) continue; // chips appear once the check says learning (it calls schedule())
     const chip = makeChip(videoId, query);
     thumb.append(chip);
     checks.push(check(chip));
@@ -219,6 +264,13 @@ function schedule() {
   clearTimeout(timer);
   timer = setTimeout(safeSync, 150);
 }
+
+// Popup switch (popup.js). null until read, so nothing starts before we know.
+let enabled = null;
+chrome.storage.local.get('enabled').then(({ enabled: on }) => ((enabled = on !== false), schedule()));
+chrome.storage.onChanged.addListener((changes) => {
+  if (changes.enabled) (enabled = changes.enabled.newValue !== false), schedule();
+});
 
 new MutationObserver(schedule).observe(document.documentElement, {
   childList: true,

@@ -6,6 +6,7 @@
   "permissions": ["storage", "unlimitedStorage"],
   "host_permissions": ["https://api.typesafe.ai/*"],
   "background": { "service_worker": "background.js" },
+  "action": { "default_popup": "popup.html" },
   "options_ui": { "page": "options.html", "open_in_tab": true },
   "content_scripts": [
     {

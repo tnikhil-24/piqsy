@@ -24,8 +24,8 @@ Single-context: one root `CONTEXT.md` plus `docs/adr/`. See `docs/agents/domain.
 
 ## Code and status
 
-- `extension/`: Manifest V3, plain JS, no build step. `content.js` (search page adapter, chips, per-video evaluation), `captions.js` (caption fetcher, block pause, per-tab cache), `captionstore.js` (saved captions per video, background), `windows.js` (windowing), `verdict.js` (verdict engine), `background.js` (service worker: the only Jev caller and run-log writer), `jev.js` (Jev client), `runlog.js` (persistent run log), `options.html`/`options.js` (Jev key, log export), `chip.css`.
-- Slices 01–04 done. 10 (survive YouTube blocks): parts 2 and 3 built, awaiting the owner's Chrome check; option 1 (cookies) waits for the next block. 05 (long videos) done. 06 now also decides broad vs narrow (ADR 0005); 12 (broad-query verdicts) follows it. 11 (long-video caption speed, srv1, saving long captions) is next for long videos. Status is the `Status:` line in each `.scratch/badge/issues/*.md`; a done slice is `Status: done`.
+- `extension/`: Manifest V3, plain JS, no build step. `content.js` (search page adapter, chips, per-video evaluation), `captions.js` (caption fetcher, block pause, per-tab cache), `captionstore.js` (saved captions per video, background), `windows.js` (windowing), `verdict.js` (verdict engine), `background.js` (service worker: the only Jev caller and run-log writer), `jev.js` (Jev client), `runlog.js` (persistent run log), `options.html`/`options.js` (Jev key, log export), `popup.html`/`popup.js` (on/off switch), `chip.css`.
+- Slices 01–04 done. 10 (survive YouTube blocks): parts 2 and 3 built, awaiting the owner's Chrome check; option 1 (cookies) waits for the next block. 05 (long videos) done. 06 (learning-query check, broad vs narrow, popup switch) built, awaiting the owner's Chrome check; 12 (broad-query verdicts) follows it. 11 (long-video caption speed, srv1, saving long captions) is next for long videos. Status is the `Status:` line in each `.scratch/badge/issues/*.md`; a done slice is `Status: done`.
 
 ## Running and testing
 
