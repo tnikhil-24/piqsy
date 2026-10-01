@@ -12,6 +12,10 @@ Default vocabulary: `needs-triage`, `needs-info`, `ready-for-agent`, `ready-for-
 
 Single-context: one root `CONTEXT.md` plus `docs/adr/`. See `docs/agents/domain.md`.
 
+### Session close
+
+When the owner is closing the session or asks whether anything needs documenting, use the `session-close` skill (`.claude/skills/session-close/SKILL.md`).
+
 ## Project docs
 
 - `docs/jev.md`: what Jev (our evaluator, TypeSafe AI) is and how Piqsy uses it. Read before touching evaluation code.
