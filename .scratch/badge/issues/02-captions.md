@@ -1,21 +1,27 @@
-# 02 — Fetch captions in the browser
+# 02 — English captions in the browser (caption feasibility gate)
 
-Status: ready-for-agent
-Type: task
+Status: ready-for-human
+Type: HITL
 Blocked by: 01
 
-## What
+## Parent
 
-For each badged result, get its timestamped English captions from inside the browser, without the user opening the video. This is also the **caption feasibility spike**: the biggest risk in the product.
+`docs/prd/badge-v1.md`
+
+## What to build
+
+For each of the 5 chipped results, fetch the video's timestamped English captions inside the browser without the user opening the video. The chip shows a line count when captions were found, or `no captions` when there are none or they aren't English (auto-translated tracks rejected). Captions are remembered for the browser session so a refined search doesn't re-fetch them. Findings are written up so the owner can make the go/no-go decision.
 
 ## Acceptance criteria
 
-- [ ] Each badge shows `captions ✓` (with line count) or `no captions` + reason.
-- [ ] Console logs per video: success/failure, failure reason, latency, manual vs auto-generated.
-- [ ] Tried on: a 10-min video, a 1–3 hr video, a ~24 hr video, a video with no captions, auto-only captions, logged-in and logged-out.
+- [ ] Chip shows `captions ✓ (N lines)` or `no captions`; the reason (none, not English, fetch failed) and latency are logged to the console.
+- [ ] Manual vs auto-generated captions distinguished.
+- [ ] Captions cached per video for the browser session; a repeat search doesn't re-fetch.
+- [ ] Tried on: a 10-min video, a 1–3 hr video, a ~24 hr video, a video with no captions, auto-only captions, a non-English video, logged in and logged out.
 - [ ] Measured: time to get captions for all 5 results in parallel.
-- [ ] Findings written to `docs/captions-spike.md` (mechanism used, success rate, latency, what breaks).
+- [ ] `docs/captions-spike.md` records the mechanism, success rate, latency, and what breaks.
+- [ ] **Human step:** owner reviews the findings and decides go / plan B before slice 04.
 
-## Gate
+## Blocked by
 
-If captions can't be fetched reliably from the search page, stop and rethink before slice 03.
+- 01
