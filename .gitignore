@@ -1,0 +1,20 @@
+# Secrets (Jev API key etc.)
+.env
+.env.*
+
+# Dependencies / builds
+node_modules/
+dist/
+__pycache__/
+.venv/
+
+# Packed extension artifacts
+*.crx
+*.pem
+*.zip
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
