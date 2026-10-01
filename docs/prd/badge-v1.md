@@ -155,4 +155,4 @@ If slice 02 shows captions cannot be fetched reliably from the search page, stop
 - Rough cost: about 12k tokens per hour of speech, so a 1-hour video ≈ $0.0005 and a 24-hour video ≈ $0.013 per query at $0.042 per million input tokens.
 - Open experiment for the benchmark slice: whether one Jev request can score many windows at once (numbered windows in one state) as accurately as one window per request. If so, switch to it to cut request counts.
 - The biggest product risk remains caption access from the search page; the second is Great precision. Both have explicit checks (slice 02 and the benchmark).
-- Slices are the issue files in `.scratch/badge/issues/` (01–12; status in each file). The original numbering above this line in older notes no longer applies.
+- Slices are the issue files in `.scratch/badge/issues/` (01–12; status in each file). (The PRD's original slice list used different numbers.)
