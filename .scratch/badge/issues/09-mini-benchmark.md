@@ -37,3 +37,5 @@ About 50 hand-labelled cases `(query, video, label, relevant start)` covering sh
 **2026-10-01, from ADR 0005:** label each case's query as broad or narrow too, and include several broad queries (`dsa full course`, `learn kafka`, …). Tune the broad/narrow threshold and the broad coverage share. Experiment: one whole-video Jev question for broad queries vs the coverage-share rule.
 
 **2026-10-01, from slice 05:** include long videos where the topic is one section (second pass): e.g. `8hly31xKli0` (5.4 h) and `pkYVOmU3MgA` (12.5 h) for `data structures and algorithms full course` refined well; check the refined range against where the topic really starts. Fine 2-minute windows score lower than the wide window they refine (0.78 → 0.72), so check whether `RANGE_MIN` should differ for fine windows.
+
+**2026-10-01, from slice 12 owner check:** all 5 `data structures and algorithms full course` results came out Great, throughout. Add broad negatives (a full course on another subject, a video that only mentions the subject) to check that `BROAD_GREAT_SHARE` and the "teaches part of" question are not too lenient.
