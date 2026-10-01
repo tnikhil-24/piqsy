@@ -46,9 +46,12 @@ function judge(windows) {
 }
 
 // Second pass: ranges with the wide best window swapped for its scored 2-minute
-// windows. If none of those reaches RANGE_MIN, the wide window stays.
+// windows. If none of those reaches RANGE_MIN, the wide window stays. Fine
+// windows score lower (less context), so passing ones keep the best window's
+// score for ranking; otherwise weaker coarse ranges push the strongest out.
 function refine(windows, best, fine) {
-  const inner = fine.some((f) => f.score >= RANGE_MIN) ? fine : [best];
+  const passing = fine.filter((f) => f.score >= RANGE_MIN);
+  const inner = passing.length ? fine.map((f) => (passing.includes(f) ? { ...f, score: Math.max(f.score, best.score) } : f)) : [best];
   return rangesOf(windows.flatMap((w) => (w === best ? inner : [w])));
 }
 

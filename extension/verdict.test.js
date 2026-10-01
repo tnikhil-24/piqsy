@@ -60,7 +60,16 @@ test('bestWindow is the highest-scoring window', () => {
 test('refine: fine 2-minute windows inside the best wide window set the range', () => {
   const ws = [0.1, 0.9, 0.1, 0.1, 0.1].map((score, i) => ({ start: i * 1440, end: (i + 1) * 1440, score }));
   const fine = [0.2, 0.75, 0.88, 0.3].map((score, i) => ({ start: 1440 + i * 120, end: 1440 + (i + 1) * 120, score }));
-  assert.deepEqual(refine(ws, ws[1], fine), [{ start: 1550, end: 1800, peak: 0.88, strongest: true }]);
+  assert.deepEqual(refine(ws, ws[1], fine), [{ start: 1550, end: 1800, peak: 0.9, strongest: true }]);
+});
+
+test('refine: the refined best range is not pushed out by weaker coarse ranges', () => {
+  // Owner check pkYVOmU3MgA: best 0.78 refined to fine 0.72 lost to three coarse 0.72-0.74 ranges.
+  const ws = [0.74, 0.1, 0.74, 0.1, 0.72, 0.1, 0.78].map((score, i) => ({ start: i * 720, end: (i + 1) * 720, score }));
+  const fine = [0.3, 0.72, 0.5, 0.2, 0.1, 0.1].map((score, i) => ({ start: 4320 + i * 120, end: 4320 + (i + 1) * 120, score }));
+  const ranges = refine(ws, ws[6], fine);
+  assert.equal(ranges.length, 3);
+  assert.deepEqual(ranges.find((r) => r.strongest), { start: 4430, end: 4560, peak: 0.78, strongest: true });
 });
 
 test('refine keeps the wide window when no fine window reaches the range threshold', () => {
