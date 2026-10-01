@@ -14,6 +14,7 @@ The first real verdict. The owner pastes their Jev key into the options page (wi
 
 ## Acceptance criteria
 
+- [ ] **Do first:** stale results are no longer chipped under a new query (see the 2026-10-01 comment from slice 03).
 - [ ] Options page stores the Jev key locally and clearly reports an invalid key.
 - [ ] Jev is called from the background service worker only (host permission for the Jev API).
 - [ ] Jev client: one `noul` request per window, parallel with a concurrency limit, retries with backoff on 429/529/5xx honouring `Retry-After`, no retry on 401.
@@ -35,3 +36,5 @@ The first real verdict. The owner pastes their Jev key into the options page (wi
 - YouTube re-renders search results right after each search, so chips are dropped and re-added. Cache verdicts per (query, video) and de-duplicate in-flight evaluations, or Jev is called twice per search.
 - Score each video as soon as its own captions arrive; don't wait for all 5.
 - The caption cache is in-memory per tab (`captionCache` in `extension/captions.js`). Once the background worker exists, consider moving it to `chrome.storage.session` (10 MB quota; a 31 h course is about 47k lines).
+
+**2026-10-01, from slice 03** (found in the run log): right after a new search, `sync()` in `extension/content.js` reads the new `search_query` from the URL while the previous search's results are still in the DOM. The old 5 videos get chips, caption fetches and log entries under the new query, then the real results arrive about 2 s later. Example: the b+ tree videos (`_nY8yR6iqx4`, …) were logged at 18:24:51 under "python decorators tutorial". This doubles the caption fetches per search (more 429 risk) and would double the Jev calls. Fix it before wiring Jev.
