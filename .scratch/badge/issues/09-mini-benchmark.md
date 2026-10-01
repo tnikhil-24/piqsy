@@ -30,3 +30,4 @@ About 50 hand-labelled cases `(query, video, label, relevant start)` covering sh
 - **Sparse manual tracks:** `FsAPt_9Bf3U` has 55 lines for a 30-minute video, so 14 of 16 windows are empty (score 0); it got Partial from its first window alone.
 
 **2026-10-01, owner decision:** video length doesn't matter; a very good 2-minute video deserves Great. A one-window video (under about 3 min) is now Great on its own score (≥ `GREAT_PEAK`), and a leftover piece under 1 minute joins the last window. This changes the PRD's Great rule (adjacent support) for one-window videos only. Watch short videos for false Greats here.
+- Confirmed in Chrome 2026-10-01: `U7_C8llyoGE` (95 s, one window) → Great.

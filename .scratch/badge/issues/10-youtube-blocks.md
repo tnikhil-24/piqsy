@@ -44,3 +44,7 @@ Ruled out: rotating IPs/proxies to dodge the check (evades YouTube's abuse detec
 **2026-10-01, VPN test, mode 0:** 5/5 captions (0.6–0.7 s) and 5 Great verdicts (total 1.0–1.2 s), so the VPN IP is **not** blocked and can't show whether cookies avoid a block. Windowing change confirmed (`aKOQtGLT-Yk`, 409 s: 3 windows, was 4). `U7_C8llyoGE` wasn't in the top 5 this time, so the one-window Great is still unconfirmed. The real mode 1 test needs a blocked network (hotspot or home Wi-Fi while blocked).
 
 **2026-10-01, VPN test, mode 1:** same search, 5/5 captions (0.31–0.37 s) and 5 Great (total 0.66–0.87 s). Sending cookies with the ANDROID client works and breaks nothing. Still to show: whether it avoids a block (test on the blocked hotspot/home Wi-Fi, mode 1 then mode 0).
+
+**2026-10-01, owner's normal network (no VPN), mode 0:** 5/5 captions, so the earlier block there has **lifted** (it lasted at least 4 min and less than a few hours; exact lift time unknown). So no blocked network was available to test mode 1 against. Option 1 is safe (works, no errors) but **unproven against a block**; test it on the next block before making it the default.
+- `U7_C8llyoGE` (95 s, 1 window) → **Great**: the one-window rule from `35bc3c5` is confirmed in Chrome.
+- Outlier: `KnKXHcsde5A` (188 s) captions took **10.7 s** (others 0.4–0.5 s). Same pattern as `DqcZLulVJ0M` (11.2 s) in the slice 02 run. Possibly soft throttling right after a block lifts; watch for it in the run log (`captionMs`).
