@@ -1,6 +1,6 @@
 # 05 — Long videos (up to 24 hr) and "relevant throughout"
 
-Status: built, awaiting the owner's Chrome check
+Status: done
 Type: AFK
 Blocked by: 04
 
@@ -14,11 +14,11 @@ Make verdicts work and stay fast on 1–24 hr videos. Windows grow beyond 2 minu
 
 ## Acceptance criteria
 
-- [ ] A ~24 hr video produces ≤ ~60 first-pass requests.
-- [ ] Second pass runs only for Great/Partial with a best window > 2 min, and refines ranges to 2-minute precision.
-- [ ] "Relevant throughout" at the 40% boundary (named constant); no ranges in that case.
-- [ ] Tests extended: 2 hr boundary, 24 hr cap, caption gaps, fine windows inside a range, throughout boundary.
-- [ ] A search containing a multi-hour video still meets the p95 < 8 s target, or the log shows by how much it misses.
+- [x] A ~24 hr video produces ≤ ~60 first-pass requests.
+- [x] Second pass runs only for Great/Partial with a best window > 2 min, and refines ranges to 2-minute precision.
+- [x] "Relevant throughout" at the 40% boundary (named constant); no ranges in that case.
+- [x] Tests extended: 2 hr boundary, 24 hr cap, caption gaps, fine windows inside a range, throughout boundary.
+- [x] A search containing a multi-hour video still meets the p95 < 8 s target, or the log shows by how much it misses.
 
 ## Blocked by
 
