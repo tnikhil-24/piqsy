@@ -80,17 +80,39 @@ function topResults() {
   return out;
 }
 
+// On a new search YouTube updates the URL before it swaps the results, so for
+// a moment the previous query's videos sit under the new query. Chips wait
+// while the results are exactly the ones last seen for another query.
+// ponytail: a new query that truly returns the same top 5 gets chips after STALE_MS.
+const STALE_MS = 3000;
+let shown = { query: null, ids: '', staleSince: 0 };
+
+function isStale(query, ids) {
+  if (!ids) return false;
+  if (query === shown.query || ids !== shown.ids) {
+    shown = { query, ids, staleSince: 0 };
+    return false;
+  }
+  if (!shown.staleSince) {
+    shown.staleSince = Date.now();
+    setTimeout(schedule, STALE_MS);
+  }
+  return Date.now() - shown.staleSince < STALE_MS;
+}
+
 // Idempotent: YouTube recycles renderer elements across searches, so a chip
 // stays only while its thumbnail still shows the same video for the same query.
 function sync() {
   if (location.pathname !== '/results') return;
   const query = new URLSearchParams(location.search).get('search_query') || '';
-  const wanted = new Map(topResults().map(({ videoId, thumb }) => [thumb, videoId]));
+  const results = topResults();
+  const wanted = new Map(results.map(({ videoId, thumb }) => [thumb, videoId]));
 
   for (const chip of document.querySelectorAll('.piqsy-chip')) {
     const thumb = chip.parentElement;
     if (wanted.get(thumb) !== chip.dataset.videoId || chip.dataset.query !== query) chip.remove();
   }
+  if (isStale(query, results.map((r) => r.videoId).join())) return;
   const t0 = performance.now();
   const checks = [];
   for (const [thumb, videoId] of wanted) {
