@@ -1,7 +1,7 @@
 // node --test
 const test = require('node:test');
 const assert = require('node:assert');
-const { pickTrack, parseJson3 } = require('./captions.js');
+const { pickTrack, parseJson3, isBlock } = require('./captions.js');
 
 const track = (vssId, languageCode, kind) => ({ vssId, languageCode, kind });
 
@@ -31,4 +31,12 @@ test('parseJson3 joins segments, drops empty events, converts ms to s', () => {
     { start: 0.719, duration: 4.04, text: 'welcome to the' },
     { start: 4.759, duration: 0, text: 'course' },
   ]);
+});
+
+test('isBlock: IP-level refusals only, not one unavailable video', () => {
+  assert.ok(isBlock({ detail: 'timedtext HTTP 429, 1103 bytes' }));
+  assert.ok(isBlock({ detail: 'player LOGIN_REQUIRED: Sign in to confirm you’re not a bot' }));
+  assert.ok(!isBlock({ detail: 'player LOGIN_REQUIRED: Sign in to confirm your age' }));
+  assert.ok(!isBlock({ detail: 'paused after a YouTube block until 3:00:00 PM' }));
+  assert.ok(!isBlock({ reason: 'none' }));
 });

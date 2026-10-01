@@ -1,6 +1,6 @@
 # 10 — Survive YouTube blocks
 
-Status: needs-triage
+Status: ready-for-human
 Type: AFK (parts 2 and 3) + HITL (part 1 probe)
 Blocked by: 04
 
@@ -30,9 +30,9 @@ Ruled out: rotating IPs/proxies to dodge the check (evades YouTube's abuse detec
 
 ## Acceptance criteria
 
-- [ ] After the first 429 or bot check, no caption requests go out for the pause period; chips show `Piqsy error`; the run log records the block.
-- [ ] Captions survive a tab reload and an extension reload; a repeat search after a reload sends no caption requests.
-- [ ] Storage stays bounded (oldest videos dropped past a limit).
+- [x] After the first 429 or bot check, no caption requests go out for the pause period; chips show `Piqsy error`; the run log records the block.
+- [x] Captions survive a tab reload and an extension reload; a repeat search after a reload sends no caption requests.
+- [x] Storage stays bounded (oldest videos dropped past a limit).
 - [ ] Option 1 probed and the result recorded in `docs/captions-spike.md`.
 
 ## Comments
@@ -55,3 +55,11 @@ Ruled out: rotating IPs/proxies to dodge the check (evades YouTube's abuse detec
 - Mode 1 total: 4 searches (19:11 and 19:15 on VPN, 19:17 and 19:18 on the normal network), 20/20 captions, 0 errors. Mode 1 is safe on both networks.
 - Mode 2: 10/10 rejected (HTTP 400), removed.
 - **Recurring ~10 s outlier:** `KnKXHcsde5A` (188 s video) took 10.4 s (19:11, mode 1, VPN) and 10.7 s (19:18, mode 0, normal) for captions, but 0.35–0.67 s in three other runs. Each slow time was the last of 5 parallel fetches. Same as `tfCz563ebsU` 4.4 s (18:43) and `DqcZLulVJ0M` 11.2 s (slice 02). It isn't tied to one video or cookie mode. **It breaks the p95 < 8 s target.** Next step: log the player and timedtext times separately to see which request stalls.
+
+**2026-10-01, owner:** the "normal network" was the **hotspot**, so its bot check lasted **under 25 min** (blocked 18:54 UTC, fine by 19:17 UTC). Home Wi-Fi's timedtext 429 lasted over an hour. Owner OK'd parts 2 and 3; saved captions are per video only.
+
+**2026-10-01, parts 2 and 3 built (agent):**
+- Pause: `isBlock` in `extension/captions.js` (timedtext/player HTTP 429, or "not a bot"; not "confirm your age") sets `localStorage.piqsyPausedUntil` = now + 30 min (`PAUSE_MS`). While paused, no caption requests; chips show `Piqsy error` and the run log `detail` says "paused after a YouTube block until …". Shared by all tabs, survives reloads. To test during a pause: `delete localStorage.piqsyPausedUntil`.
+- Saved captions: `extension/captionstore.js` in the background worker, key `cap:<videoId>` + `capIndex`; only results with captions (not "none", which can change for fresh uploads); newest 200 videos; videos over 5,000 lines not saved. `unlimitedStorage` permission added.
+- Stall diagnosis: each fetch logs `playerMs` and `textMs` (console and run log).
+- **Owner check:** search once, reload the tab, search again: the second run's lines say `[cached]` and no requests go out. Watch the next 10 s stall's `player`/`text` split.

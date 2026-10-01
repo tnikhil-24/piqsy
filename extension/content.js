@@ -29,7 +29,7 @@ async function evaluate(query, videoId) {
   const { result, cached } = await getCaptions(videoId);
   const captionMs = ms(t0);
   const what = result.lines ? `${result.kind} ${result.lang}, ${result.lines.length} lines, ${result.durationSec}s video` : result.reason;
-  console.log(`[piqsy] captions ${videoId}: ${what}${result.detail ? ` (${result.detail})` : ''} in ${captionMs}ms${cached ? ' [cached]' : ''} [cookies ${cookieMode()}]`);
+  console.log(`[piqsy] captions ${videoId}: ${what}${result.detail ? ` (${result.detail})` : ''} in ${captionMs}ms${cached ? ' [cached]' : ` (player ${result.playerMs ?? '-'}ms, text ${result.textMs ?? '-'}ms)`} [cookies ${cookieMode()}]`);
   const entry = {
     ts: new Date().toISOString(),
     query,
@@ -42,6 +42,8 @@ async function evaluate(query, videoId) {
     lines: result.lines?.length ?? null,
     durationSec: result.durationSec ?? null,
     captionMs,
+    playerMs: cached ? null : (result.playerMs ?? null),
+    textMs: cached ? null : (result.textMs ?? null),
     cached,
     cookieMode: cookieMode(),
     verdict: null,

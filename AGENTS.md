@@ -23,8 +23,8 @@ Single-context: one root `CONTEXT.md` plus `docs/adr/`. See `docs/agents/domain.
 
 ## Code and status
 
-- `extension/`: Manifest V3, plain JS, no build step. `content.js` (search page adapter, chips, per-video evaluation), `captions.js` (caption fetcher + per-tab cache), `windows.js` (windowing), `verdict.js` (verdict engine), `background.js` (service worker: the only Jev caller and run-log writer), `jev.js` (Jev client), `runlog.js` (persistent run log), `options.html`/`options.js` (Jev key, log export), `chip.css`.
-- Slices 01–04 done. Next: 10 (survive YouTube blocks), proposed before 05 (long videos); awaiting the owner's OK. Status is the `Status:` line in each `.scratch/badge/issues/*.md`; a done slice is `Status: done`.
+- `extension/`: Manifest V3, plain JS, no build step. `content.js` (search page adapter, chips, per-video evaluation), `captions.js` (caption fetcher, block pause, per-tab cache), `captionstore.js` (saved captions per video, background), `windows.js` (windowing), `verdict.js` (verdict engine), `background.js` (service worker: the only Jev caller and run-log writer), `jev.js` (Jev client), `runlog.js` (persistent run log), `options.html`/`options.js` (Jev key, log export), `chip.css`.
+- Slices 01–04 done. 10 (survive YouTube blocks): parts 2 and 3 built, awaiting the owner's Chrome check; option 1 (cookies) waits for the next block. Then 05 (long videos). Status is the `Status:` line in each `.scratch/badge/issues/*.md`; a done slice is `Status: done`.
 
 ## Running and testing
 
@@ -45,3 +45,4 @@ The same day the hotspot was blocked too, at normal-use volume (about 60 videos 
 - Ask for as few searches as the check needs, with short videos.
 - Reloading the extension or the tab empties the caption cache, so the next search fetches everything again. Don't ask for reloads that aren't needed.
 - Run-log timestamps (`ts`) are UTC.
+- After a block Piqsy sends no caption requests for 30 min (`localStorage.piqsyPausedUntil` on youtube.com; delete it to test). Saved captions survive reloads, so repeat searches cost nothing.

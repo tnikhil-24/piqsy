@@ -3,7 +3,7 @@
   "name": "Piqsy",
   "version": "0.1.0",
   "description": "Rates how well the top YouTube search results actually cover your query.",
-  "permissions": ["storage"],
+  "permissions": ["storage", "unlimitedStorage"],
   "host_permissions": ["https://api.typesafe.ai/*"],
   "background": { "service_worker": "background.js" },
   "options_ui": { "page": "options.html", "open_in_tab": true },
