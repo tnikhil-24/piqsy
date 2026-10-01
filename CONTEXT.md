@@ -8,6 +8,7 @@ Use these terms exactly. Avoid the listed synonyms.
 | **Learning query** | A query whose purpose is to learn a concept or skill, as judged by the learning-query check. Non-learning queries get no chips. | educational search |
 | **Broad query** | A learning query for a whole subject ("dsa full course", "learn kafka"). Judged by how much of the video is on the subject (ADR 0005). | general query |
 | **Narrow query** | A learning query for one concept ("b+ tree deletion"). Judged by the best windows and ranges. The default when Piqsy can't tell. | specific query |
+| **Topic** | The query with format words removed; what windows are scored against. The original query if nothing is left. | |
 | **Format words** | Words in a query that describe the video, not the topic ("full course", "tutorial", "for beginners"). Removed before scoring; a hint toward broad. | |
 | **Result** | One regular video in YouTube's search results. Only the top 5 are evaluated. Shorts, ads, channels, playlists and mixes are not results. | item, card |
 | **Captions** | Timestamped English text of a video (creator-written or auto-generated; never auto-translated). | transcript (fine informally), subtitles |
@@ -21,6 +22,7 @@ Use these terms exactly. Avoid the listed synonyms.
 | **no captions** / **Piqsy error** | Piqsy couldn't check (no English captions / a failure). Not verdicts. | Unsure |
 | **Range** | A run of consecutive relevant windows, start shifted 10 s earlier. Up to 3 per video. | timestamp (a range has a start *and* end) |
 | **Relevant throughout** | Relevant windows cover ≥ 40% of the video; shown instead of ranges. | |
+| **Relevant from** | Relevant throughout, but the first relevant window starts after 0:00 (e.g. an intro); the strip shows where relevance begins. | |
 | **Chip** | The badge on a search result's thumbnail (top-left). | badge (OK informally), pill |
 | **Strip** | The bar under the player on the watch page that lists ranges. | banner |
 | **Block** | YouTube refusing Piqsy's caption requests from an IP: timedtext HTTP 429, or the player's "Sign in to confirm you're not a bot". Shows as `Piqsy error`; also breaks the user's own YouTube captions while it lasts. | ban, rate limit (only for the 429) |
