@@ -24,7 +24,7 @@ Single-context: one root `CONTEXT.md` plus `docs/adr/`. See `docs/agents/domain.
 ## Code and status
 
 - `extension/`: Manifest V3, plain JS, no build step. `content.js` (search page adapter, chips, per-video evaluation), `captions.js` (caption fetcher + per-tab cache), `windows.js` (windowing), `verdict.js` (verdict engine), `background.js` (service worker: the only Jev caller and run-log writer), `jev.js` (Jev client), `runlog.js` (persistent run log), `options.html`/`options.js` (Jev key, log export), `chip.css`.
-- Slices 01–03 done; 04 (Jev verdict) code done, awaiting the owner's Jev key and Chrome check. Status is the `Status:` line in each `.scratch/badge/issues/*.md`; a done slice is `Status: done`.
+- Slices 01–04 done; next is 05 (long videos). Status is the `Status:` line in each `.scratch/badge/issues/*.md`; a done slice is `Status: done`.
 
 ## Running and testing
 
