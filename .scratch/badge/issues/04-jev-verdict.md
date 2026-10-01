@@ -1,6 +1,6 @@
 # 04 — Jev verdict on short videos
 
-Status: ready-for-human
+Status: done
 Type: AFK
 Blocked by: 02, 03
 
@@ -23,7 +23,7 @@ The first real verdict. The owner pastes their Jev key into the options page (wi
 - [x] Chip shows the verdict; Jev/network failure after retries shows `Piqsy error`.
 - [x] Run log gains: window count, Jev latency, total latency, verdict, ranges, per-window scores.
 - [x] Automated tests (Node built-in runner) for the verdict engine, windowing and the Jev client (fake fetch), testing behaviour through their interfaces.
-- [ ] Measured on real searches: p50/p95 time to verdict for the top 5.
+- [x] Measured on real searches: p50/p95 time to verdict for the top 5.
 
 ## Blocked by
 
@@ -45,3 +45,8 @@ The first real verdict. The owner pastes their Jev key into the options page (wi
 - The run log moved to the background worker (single writer, fixes the cross-tab race) and gained `verdict`, `windows`, `jevMs`, `totalMs`, `ranges`, `scores`, `jevError`. One entry per evaluation, not per chip.
 - Options page: key field ("Save and check"); a 401 shows "Jev rejected this key".
 - **Owner steps:** paste the key, check the chips on a few searches, then export the log so p50/p95 of `totalMs` can be computed (last criterion).
+
+**2026-10-01, owner's Chrome run (hotspot): done.** 5 searches, 25 results: 21 evaluated, 4 `no captions`, 0 errors.
+- Time to verdict per video (21 evaluations): **p50 1.0 s, p95 3.7 s, max 4.7 s**, within the target (p50 < 4 s, p95 < 8 s). Whole top-5 batch: 0.9–4.7 s. Caption fetch is the slow part (up to 4.4 s); Jev took 0.18–0.96 s for short videos and 1.7 s / 3.1 s for 60 windows (3.4 h and 24.6 h lofi videos).
+- Verdicts: python decorators 4 Great + 1 Partial; b+ tree deletion 3 Partial + 1 Unsure + 1 no captions; kafka rebalancing 5 Great; react useEffect cleanup 4 Great + 1 Partial; lofi hip hop 2 Not covered + 3 no captions.
+- Quality notes are on slice 09.
