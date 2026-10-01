@@ -12,7 +12,7 @@ Blocked by: 04
 
 On 2026-10-01 YouTube blocked two networks in one day: home Wi-Fi (timedtext HTTP 429) and the phone hotspot (player `LOGIN_REQUIRED: Sign in to confirm you're not a bot`, every video, ~160 ms). The hotspot had seen about 60 distinct videos (~115 requests) in a few hours, which a heavy user can reach in a day. So blocks are a product problem, not just a testing one. Details: `docs/captions-spike.md` ("What breaks" 1 and 6).
 
-Ruled out: rotating IPs/proxies to dodge the check (evades YouTube's abuse detection, breaks their terms). Chrome profiles don't help (the block is per IP; Piqsy sends no cookies).
+Not ruled out (owner, 2026-10-01): rotating IPs/proxies and Chrome profiles are still options, with their costs in `docs/youtube-blocks.md`.
 
 ## Options (most to least promising)
 

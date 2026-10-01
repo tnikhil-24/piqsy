@@ -50,7 +50,7 @@ A block covers the **whole IP**, not just Piqsy. While it's on, YouTube's own pl
 
 ## Options to brainstorm
 
-Ruled out: rotating IPs or proxies to get around the check (that's evading YouTube's abuse detection and breaks their terms). Chrome profiles (the block is per IP). Cookies (no effect on the timedtext block, tested).
+Nothing is ruled out yet (owner, 2026-10-01). Some options have been tried; each is listed with its evidence.
 
 ### A. Fetch less (the only defence we have today)
 
@@ -63,11 +63,14 @@ Ruled out: rotating IPs or proxies to get around the check (that's evading YouTu
 
 5. **`get_transcript` (YouTube's "Show transcript" panel) from inside a real page.** It returned `FAILED_PRECONDITION` from curl in the slice 02 spike, but it might work with the page's own session and context. Needs research.
 6. **Use what the page already loads.** YouTube's own player fetches captions for the video being watched, and maybe for hover previews. Watch-page-only Piqsy costs zero extra requests, but loses the search chip.
+6a. **Send the user's own YouTube session (cookies).** Tried (issue 10, mode 1): it works and breaks nothing, but during a real timedtext block (home, 21:31 UTC) timedtext still returned 429. Untested: whether it avoids the player bot check, and whether a signed-in session is allowed more requests before it gets blocked. Cost: the requests are tied to the user's Google account, so a block could land on the account, not just the IP.
+6b. **Separate Chrome profiles.** Untested. They'd only help if the block depended on cookies or the browser. Piqsy sends no cookies by default and blocks so far followed the IP, so likely no effect. A cheap test while blocked: a fresh profile on the same network.
 
 ### C. Don't fetch from the user's IP
 
 7. **A third-party transcript API** (paid services that fetch captions themselves). Moves the problem to them and needs a backend or a key in the extension (ADR 0002). Check their terms and how reliable they are.
 8. **A shared caption cache on a server.** Each video gets fetched once across all users. Needs a backend (ADR 0002) and raises the policy question in `docs/assessment.md` (collecting captions through users' browsers).
+8a. **Rotating IPs or proxies.** Send caption requests through other IPs so no single IP reaches the limit. Common among caption scrapers, and it would remove the block from the user's own network. Costs: proxy fees; Piqsy would need a backend or a proxy setup per user; it deliberately gets around YouTube's abuse detection, which breaks YouTube's terms and puts a Chrome Web Store listing at risk; users' requests go through a third party (privacy); residential proxy networks are often built from other people's devices without their clear consent. A VPN worked once (issue 10, 19:11 UTC) but shared VPN IPs are often already flagged.
 9. Not an option: the official YouTube Data API's `captions.download` only works for videos you own.
 
 ### D. Need fewer captions
